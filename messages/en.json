@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "home": "Home",
+    "daily": "Daily Recap",
+    "topics": "Topics",
+    "newsletter": "Newsletter",
+    "about": "About"
+  },
+  "home": {
+    "hero_title": "Everything you need to see in football today",
+    "hero_subtitle": "The top stories, moments and trends from the last 24h — in 2 minutes.",
+    "hero_cta": "See today's top 5",
+    "top5_title": "Top 5 Today",
+    "exploding_title": "What's Exploding",
+    "mustwatch_title": "Must-Watch Clips",
+    "matches_title": "Matches to Watch",
+    "trending_title": "Trending Now",
+    "newsletter_title": "Never miss a thing",
+    "newsletter_subtitle": "Get the daily football digest delivered straight to your inbox.",
+    "newsletter_placeholder": "Your email address",
+    "newsletter_cta": "Subscribe",
+    "recap_cta": "See full recap"
+  },
+  "daily": {
+    "title": "{date} Recap",
+    "top10_title": "Top 10 Today",
+    "summary_title": "Day Summary",
+    "clips_title": "Must-Watch Moments",
+    "transfers_title": "Transfers",
+    "matches_title": "Matches"
+  },
+  "item": {
+    "why_it_matters": "Why it matters",
+    "see_source": "See source",
+    "must_watch": "Must watch",
+    "trending": "Trending"
+  },
+  "newsletter": {
+    "success": "You're in! Your first digest is coming soon.",
+    "error": "Something went wrong. Please try again.",
+    "already_subscribed": "You're already subscribed."
+  },
+  "meta": {
+    "site_name": "Football FOMO",
+    "default_description": "Everything you need to see in football today — in 2 minutes. Top stories, viral moments, transfers and trends from the last 24 hours."
+  }
+}

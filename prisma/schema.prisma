@@ -1,0 +1,269 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum PostType {
+  DAILY_RECAP
+  STORY
+  EVERGREEN
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum EntityType {
+  PLAYER
+  CLUB
+  NATIONAL_TEAM
+  COMPETITION
+}
+
+enum SourceType {
+  NEWS_SITE
+  SOCIAL_MEDIA
+  OFFICIAL
+  YOUTUBE
+  RSS
+  OTHER
+}
+
+enum NewsletterStatus {
+  ACTIVE
+  UNSUBSCRIBED
+}
+
+// ─── USERS (admin) ────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("editor")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+
+  @@map("users")
+}
+
+// ─── CATEGORIES ───────────────────────────────────────────────────────────────
+
+model Category {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameEn    String
+  nameFr    String
+  color     String?
+  createdAt DateTime @default(now())
+
+  trendItems TrendItem[]
+
+  @@map("categories")
+}
+
+// ─── TAGS ─────────────────────────────────────────────────────────────────────
+
+model Tag {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameEn    String
+  nameFr    String
+  createdAt DateTime @default(now())
+
+  posts      PostTag[]
+  trendItems TrendItemTag[]
+
+  @@map("tags")
+}
+
+// ─── ENTITIES (players, clubs, national teams, competitions) ──────────────────
+
+model Entity {
+  id            String     @id @default(cuid())
+  slug          String     @unique
+  nameEn        String
+  nameFr        String?
+  entityType    EntityType
+  descriptionEn String?
+  descriptionFr String?
+  imageUrl      String?
+  country       String?
+  active        Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  trendItems TrendItemEntity[]
+
+  @@map("entities")
+}
+
+// ─── SOURCES ──────────────────────────────────────────────────────────────────
+
+model Source {
+  id         String     @id @default(cuid())
+  name       String
+  slug       String     @unique
+  sourceType SourceType
+  url        String
+  trustScore Int        @default(50)
+  active     Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+
+  trendItems TrendItemSource[]
+
+  @@map("sources")
+}
+
+// ─── POSTS (daily recap, stories, evergreen) ──────────────────────────────────
+
+model Post {
+  id           String     @id @default(cuid())
+  slug         String     @unique
+  type         PostType
+  status       PostStatus @default(DRAFT)
+  titleEn      String
+  titleFr      String
+  summaryEn    String?
+  summaryFr    String?
+  bodyEn       String?    @db.Text
+  bodyFr       String?    @db.Text
+  seoTitleEn   String?
+  seoTitleFr   String?
+  seoDescEn    String?
+  seoDescFr    String?
+  canonicalUrl String?
+  publishDate  DateTime?
+  scheduledAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id])
+
+  trendItems PostTrendItem[]
+  tags       PostTag[]
+
+  @@index([type, status, publishDate])
+  @@index([slug])
+  @@map("posts")
+}
+
+// ─── TREND ITEMS ──────────────────────────────────────────────────────────────
+
+model TrendItem {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  titleEn           String
+  titleFr           String
+  shortSummaryEn    String
+  shortSummaryFr    String
+  whyItMattersEn    String?
+  whyItMattersFr    String?
+  sourceUrl         String?
+  mediaUrl          String?
+  videoUrl          String?
+  trendScore        Int      @default(0)
+  momentum          Int      @default(0)
+  sourceDiversity   Int      @default(0)
+  editorialPriority Int      @default(0)
+  eventWeight       Int      @default(0)
+  mustWatch         Boolean  @default(false)
+  featured          Boolean  @default(false)
+  publishDate       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  posts    PostTrendItem[]
+  entities TrendItemEntity[]
+  sources  TrendItemSource[]
+  tags     TrendItemTag[]
+
+  @@index([trendScore, publishDate])
+  @@index([publishDate])
+  @@map("trend_items")
+}
+
+// ─── JOIN TABLES ──────────────────────────────────────────────────────────────
+
+model PostTrendItem {
+  postId      String
+  trendItemId String
+  rank        Int    @default(0)
+
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  trendItem TrendItem @relation(fields: [trendItemId], references: [id], onDelete: Cascade)
+
+  @@id([postId, trendItemId])
+  @@map("post_trend_items")
+}
+
+model PostTag {
+  postId String
+  tagId  String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model TrendItemEntity {
+  trendItemId String
+  entityId    String
+
+  trendItem TrendItem @relation(fields: [trendItemId], references: [id], onDelete: Cascade)
+  entity    Entity    @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@id([trendItemId, entityId])
+  @@map("trend_item_entities")
+}
+
+model TrendItemSource {
+  trendItemId String
+  sourceId    String
+
+  trendItem TrendItem @relation(fields: [trendItemId], references: [id], onDelete: Cascade)
+  source    Source    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([trendItemId, sourceId])
+  @@map("trend_item_sources")
+}
+
+model TrendItemTag {
+  trendItemId String
+  tagId       String
+
+  trendItem TrendItem @relation(fields: [trendItemId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([trendItemId, tagId])
+  @@map("trend_item_tags")
+}
+
+// ─── NEWSLETTER ───────────────────────────────────────────────────────────────
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  locale    String   @default("fr")
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("newsletters")
+}

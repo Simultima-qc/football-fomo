@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "daily": "Daily Recap",
+    "topics": "Sujets",
+    "newsletter": "Newsletter",
+    "about": "À propos"
+  },
+  "home": {
+    "hero_title": "Tout ce que tu dois voir aujourd'hui dans le football",
+    "hero_subtitle": "Le top des sujets, moments et tendances des dernières 24h — en 2 minutes.",
+    "hero_cta": "Voir le top 5 d'aujourd'hui",
+    "top5_title": "Top 5 du jour",
+    "exploding_title": "Ce qui explose",
+    "mustwatch_title": "Clips à voir",
+    "matches_title": "Matchs à ne pas manquer",
+    "trending_title": "Tendances",
+    "newsletter_title": "Ne rate plus rien",
+    "newsletter_subtitle": "Reçois le résumé football du jour directement dans ta boîte mail.",
+    "newsletter_placeholder": "Ton adresse email",
+    "newsletter_cta": "Je m'abonne",
+    "recap_cta": "Voir le recap complet"
+  },
+  "daily": {
+    "title": "Recap du {date}",
+    "top10_title": "Top 10 du jour",
+    "summary_title": "Résumé de la journée",
+    "clips_title": "Moments à voir",
+    "transfers_title": "Transferts",
+    "matches_title": "Matchs"
+  },
+  "item": {
+    "why_it_matters": "Pourquoi c'est important",
+    "see_source": "Voir la source",
+    "must_watch": "À voir absolument",
+    "trending": "Tendance"
+  },
+  "newsletter": {
+    "success": "Parfait ! Tu vas recevoir ton premier résumé très bientôt.",
+    "error": "Une erreur s'est produite. Réessaie.",
+    "already_subscribed": "Tu es déjà inscrit(e)."
+  },
+  "meta": {
+    "site_name": "Football FOMO",
+    "default_description": "Tout ce que tu dois voir aujourd'hui dans le football — en 2 minutes. Top sujets, moments viraux, transferts et tendances des dernières 24h."
+  }
+}
