@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ArrowRight, Flame, TrendingUp, Play, Calendar } from "lucide-react";
@@ -6,6 +7,34 @@ import { Footer } from "@/components/layout/Footer";
 import { TrendItemCard } from "@/components/shared/TrendItemCard";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
 import { getTop5Today, getExplodingToday, getMustWatchToday } from "@/lib/supabase/queries";
+
+const BASE_URL = "https://footballfomo.com";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+
+  return {
+    title: isEn
+      ? "Football News Today | FootballFOMO"
+      : "Actualités football aujourd'hui | FootballFOMO",
+    description: isEn
+      ? "Daily football news, trends and highlights. Everything you need to see in football today."
+      : "Actualités, tendances et moments clés du football. Tout ce que vous devez voir aujourd'hui.",
+    alternates: {
+      canonical: `${BASE_URL}/${locale}`,
+      languages: {
+        en: `${BASE_URL}/en`,
+        fr: `${BASE_URL}/fr`,
+        "x-default": `${BASE_URL}/en`,
+      },
+    },
+  };
+}
 
 async function getHomepageData() {
   const [top5, exploding, mustWatch] = await Promise.all([
