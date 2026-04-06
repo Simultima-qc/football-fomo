@@ -9,11 +9,11 @@ const RSS_FEEDS = [
   { url: "https://feeds.bbci.co.uk/sport/football/rss.xml", source: "BBC Sport" },
   { url: "https://www.theguardian.com/football/rss", source: "The Guardian" },
   { url: "https://www.skysports.com/rss/12040", source: "Sky Sports" },
-  { url: "https://www.goal.com/feeds/en/news", source: "Goal.com" },
   { url: "https://www.espn.com/espn/rss/soccer/news", source: "ESPN FC" },
   { url: "https://www.lequipe.fr/rss/actu_rss_Football.xml", source: "L'Équipe" },
   { url: "https://rmcsport.bfmtv.com/rss/football/", source: "RMC Sport" },
-  { url: "https://as.com/rss/tags/futbol_mundial.xml", source: "AS" },
+  { url: "https://www.transfermarkt.com/rss/news", source: "Transfermarkt" },
+  { url: "https://theathletic.com/rss-feed/", source: "The Athletic" },
 ];
 
 const CATEGORY_SLUGS = [
@@ -127,8 +127,10 @@ Return this exact JSON structure:
       ],
     });
 
-    const text =
+    const raw =
       response.content[0].type === "text" ? response.content[0].text.trim() : "";
+    // Strip markdown code blocks if Haiku wraps the response
+    const text = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
     return JSON.parse(text) as ArticleAnalysis;
   } catch (e) {
     console.error(`Analysis failed for "${article.title}":`, (e as Error).message);
