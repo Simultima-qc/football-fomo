@@ -206,6 +206,7 @@ export default async () => {
       if (!analysis || !analysis.isFootball) continue;
 
       toInsert.push({
+        id: crypto.randomUUID(),
         slug: `${analysis.slug}-${dateStr}`.slice(0, 80),
         titleEn: analysis.titleEn,
         titleFr: analysis.titleFr,
