@@ -224,6 +224,7 @@ export default async () => {
         featured: analysis.featured,
         categoryId: categoryMap[analysis.category] ?? null,
         publishDate: today.toISOString(),
+        updatedAt: new Date().toISOString(),
       });
     }
   }
