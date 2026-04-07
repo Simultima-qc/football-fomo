@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { TrendItemCard } from "@/components/shared/TrendItemCard";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
-import { getTop5Today, getExplodingToday, getMustWatchToday } from "@/lib/supabase/queries";
+import { getTop5Today, getExplodingToday, getMustWatchToday, getLatestAvailableDate } from "@/lib/supabase/queries";
 
 const BASE_URL = "https://footballfomo.com";
 
@@ -37,12 +37,14 @@ export async function generateMetadata({
 }
 
 async function getHomepageData() {
+  const latestDate = await getLatestAvailableDate();
+  const date = new Date(latestDate + "T12:00:00Z");
   const [top5, exploding, mustWatch] = await Promise.all([
-    getTop5Today(),
-    getExplodingToday(),
-    getMustWatchToday(),
+    getTop5Today(date),
+    getExplodingToday(date),
+    getMustWatchToday(date),
   ]);
-  return { top5, exploding, mustWatch };
+  return { top5, exploding, mustWatch, latestDate };
 }
 
 export default async function HomePage({
@@ -52,11 +54,10 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
-  const todayDate = new Date().toISOString().split("T")[0];
 
   const data = await getHomepageData();
 
-  const { top5, exploding, mustWatch } = data;
+  const { top5, exploding, mustWatch, latestDate: todayDate } = data;
 
   return (
     <>

@@ -20,10 +20,24 @@ export async function getTrendItemsForDate(date: Date) {
   return data ?? [];
 }
 
-export async function getTop5Today() {
+export async function getLatestAvailableDate(): Promise<string> {
   const supabase = await createClient();
-  const start = new Date(); start.setUTCHours(0, 0, 0, 0);
-  const end = new Date(); end.setUTCHours(23, 59, 59, 999);
+  const { data, error } = await supabase
+    .from("trend_items")
+    .select("publishDate")
+    .order("publishDate", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return new Date().toISOString().split("T")[0];
+  return data.publishDate.split("T")[0];
+}
+
+export async function getTop5Today(date?: Date) {
+  const supabase = await createClient();
+  const base = date ?? new Date();
+  const start = new Date(base); start.setUTCHours(0, 0, 0, 0);
+  const end = new Date(base); end.setUTCHours(23, 59, 59, 999);
 
   const { data, error } = await supabase
     .from("trend_items")
@@ -37,10 +51,11 @@ export async function getTop5Today() {
   return data ?? [];
 }
 
-export async function getExplodingToday() {
+export async function getExplodingToday(date?: Date) {
   const supabase = await createClient();
-  const start = new Date(); start.setUTCHours(0, 0, 0, 0);
-  const end = new Date(); end.setUTCHours(23, 59, 59, 999);
+  const base = date ?? new Date();
+  const start = new Date(base); start.setUTCHours(0, 0, 0, 0);
+  const end = new Date(base); end.setUTCHours(23, 59, 59, 999);
 
   const { data, error } = await supabase
     .from("trend_items")
@@ -54,10 +69,11 @@ export async function getExplodingToday() {
   return data ?? [];
 }
 
-export async function getMustWatchToday() {
+export async function getMustWatchToday(date?: Date) {
   const supabase = await createClient();
-  const start = new Date(); start.setUTCHours(0, 0, 0, 0);
-  const end = new Date(); end.setUTCHours(23, 59, 59, 999);
+  const base = date ?? new Date();
+  const start = new Date(base); start.setUTCHours(0, 0, 0, 0);
+  const end = new Date(base); end.setUTCHours(23, 59, 59, 999);
 
   const { data, error } = await supabase
     .from("trend_items")
