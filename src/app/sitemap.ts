@@ -6,9 +6,12 @@ const locales = ["fr", "en"] as const;
 
 function localizedAlternates(path: string) {
   return {
-    languages: Object.fromEntries(
-      locales.map((locale) => [locale, `${BASE_URL}/${locale}${path}`])
-    ),
+    languages: {
+      ...Object.fromEntries(
+        locales.map((locale) => [locale, `${BASE_URL}/${locale}${path}`])
+      ),
+      "x-default": `${BASE_URL}${path || ""}`,
+    },
   };
 }
 
