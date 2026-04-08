@@ -9,6 +9,7 @@ import "../globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const ADSENSE_ID = process.env.NEXT_PUBLIC_ADSENSE_ID;
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://footballfomo.com";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,6 +68,22 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "FootballFOMO",
+              url: BASE_URL,
+              inLanguage: ["en", "fr"],
+              description:
+                locale === "fr"
+                  ? "Le digest quotidien de l'actualité football."
+                  : "Your daily football news digest.",
+            }),
+          }}
+        />
         {ADSENSE_ID && (
           // eslint-disable-next-line @next/next/no-sync-scripts
           <script

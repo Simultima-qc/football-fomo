@@ -35,6 +35,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
+      url: `${BASE_URL}/en`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1,
+      alternates: localizedAlternates(""),
+    },
+    {
       url: `${BASE_URL}/fr`,
       lastModified: new Date(),
       changeFrequency: "daily",

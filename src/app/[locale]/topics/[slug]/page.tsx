@@ -13,6 +13,8 @@ interface Props {
   params: Promise<{ locale: string; slug: string }>;
 }
 
+const BASE_URL = "https://footballfomo.com";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   const category = await getCategoryBySlug(slug);
@@ -23,6 +25,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: locale === "fr"
       ? `Les derniers sujets football : ${name}`
       : `Latest football topics: ${name}`,
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/topics/${slug}`,
+      languages: {
+        en: `${BASE_URL}/en/topics/${slug}`,
+        fr: `${BASE_URL}/fr/topics/${slug}`,
+        "x-default": `${BASE_URL}/en/topics/${slug}`,
+      },
+    },
   };
 }
 
@@ -35,8 +45,37 @@ export default async function TopicPage({ params }: Props) {
   const items = await getTrendItemsByCategory(category.id);
   const name = locale === "fr" ? category.nameFr : category.nameEn;
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: locale === "fr" ? "Accueil" : "Home",
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: locale === "fr" ? "Sujets" : "Topics",
+        item: `${BASE_URL}/${locale}/topics`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name,
+        item: `${BASE_URL}/${locale}/topics/${slug}`,
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Header />
       <main className="flex-1 bg-zinc-950 text-white">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">

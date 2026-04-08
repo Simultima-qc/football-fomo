@@ -30,6 +30,8 @@ async function getDailyRecap(date: Date) {
   return { post, trendItems };
 }
 
+const BASE_URL = "https://footballfomo.com";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, date } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
@@ -41,6 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale === "fr"
         ? `Top sujets, moments viraux et tendances football du ${date}.`
         : `Top stories, viral moments and football trends from ${date}.`,
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/daily/${date}`,
+      languages: {
+        en: `${BASE_URL}/en/daily/${date}`,
+        fr: `${BASE_URL}/fr/daily/${date}`,
+        "x-default": `${BASE_URL}/en/daily/${date}`,
+      },
+    },
   };
 }
 
@@ -74,8 +84,30 @@ export default async function DailyRecapPage({ params }: Props) {
   // Merge: post trend items take priority, fall back to standalone items
   const items = trendItems;
 
+  const itemListJsonLd = items.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: locale === "fr" ? `Recap football du ${date}` : `Football recap ${date}`,
+        url: `${BASE_URL}/${locale}/daily/${date}`,
+        numberOfItems: items.length,
+        itemListElement: items.map((item, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: locale === "fr" ? item.titleFr : item.titleEn,
+          url: item.sourceUrl ?? `${BASE_URL}/${locale}/daily/${date}`,
+        })),
+      }
+    : null;
+
   return (
     <>
+      {itemListJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
       <Header />
       <main className="flex-1 bg-zinc-950 text-white">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
