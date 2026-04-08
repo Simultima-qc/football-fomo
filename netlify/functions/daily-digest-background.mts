@@ -56,6 +56,19 @@ interface RawArticle {
   source: string;
 }
 
+// ─── Non-soccer pre-filter ────────────────────────────────────────────────────
+
+const NON_SOCCER_KEYWORDS = [
+  "Big Ten", "NCAA", "NFL", "CFL", "college football",
+  "national championship basketball", "March Madness",
+  "Super Bowl", "NBA", "MLB", "NHL",
+];
+
+function isLikelyNonSoccer(article: RawArticle): boolean {
+  const text = `${article.title} ${article.summary}`.toLowerCase();
+  return NON_SOCCER_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()));
+}
+
 // ─── RSS Fetching ─────────────────────────────────────────────────────────────
 
 async function fetchFeeds(since: Date): Promise<RawArticle[]> {
@@ -98,7 +111,9 @@ async function analyzeArticle(
       messages: [
         {
           role: "user",
-          content: `Analyze this football news article. Return ONLY valid JSON, no markdown.
+          content: `Analyze this association football (soccer) news article. Return ONLY valid JSON, no markdown.
+
+IMPORTANT: This digest covers ONLY association football (soccer). You MUST set "isFootball": false for any article about: American football (NFL, CFL, college football, Big Ten, NCAA football), basketball, baseball, ice hockey, rugby, or any sport other than association football/soccer. If an article mentions teams like Michigan, Big Ten, NFL teams, or college sports programs in a non-soccer context, set "isFootball": false immediately.
 
 Title: ${article.title}
 Summary: ${article.summary.slice(0, 500)}
@@ -189,13 +204,18 @@ export default async () => {
   });
   console.log(`[daily-digest] ${uniqueArticles.length} new articles to analyze`);
 
+  // 4b. Pre-filter obvious non-soccer articles before sending to Haiku
+  const soccerArticles = uniqueArticles.filter((a) => !isLikelyNonSoccer(a));
+  const skipped = uniqueArticles.length - soccerArticles.length;
+  if (skipped > 0) console.log(`[daily-digest] ${skipped} non-soccer articles skipped by keyword filter`);
+
   // 5. Analyze in parallel batches of 5
   const BATCH_SIZE = 5;
   const toInsert: object[] = [];
   const dateStr = today.toISOString().split("T")[0];
 
-  for (let i = 0; i < Math.min(uniqueArticles.length, 40); i += BATCH_SIZE) {
-    const batch = uniqueArticles.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < Math.min(soccerArticles.length, 40); i += BATCH_SIZE) {
+    const batch = soccerArticles.slice(i, i + BATCH_SIZE);
     const analyses = await Promise.all(
       batch.map((article) => analyzeArticle(anthropic, article))
     );
