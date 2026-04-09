@@ -32,7 +32,7 @@ export function Header() {
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center gap-2 group">
             <Image
-              src="/logo.png"
+              src="/logo-header.png"
               alt="Football FOMO"
               width={160}
               height={48}

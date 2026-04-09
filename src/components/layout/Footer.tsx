@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
 export function Footer() {
@@ -11,9 +12,15 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-8">
           {/* Brand */}
           <div>
-            <span className="text-lg font-bold text-white">
-              Football<span className="text-emerald-400">FOMO</span>
-            </span>
+            <Link href={`/${locale}`}>
+              <Image
+                src="/logo.png"
+                alt="Football FOMO"
+                width={160}
+                height={48}
+                className="h-10 w-auto object-contain"
+              />
+            </Link>
             <p className="mt-2 text-sm text-zinc-500 max-w-xs">
               {locale === "fr"
                 ? "Tout ce que tu dois voir aujourd'hui dans le football — en 2 minutes."
