@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { TrendItemCard } from "@/components/shared/TrendItemCard";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
 import { getCategoryBySlug, getTrendItemsByCategory } from "@/lib/supabase/queries";
+import { Wc2026SimCTA, isWc2026Category } from "@/components/shared/Wc2026SimCTA";
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -94,6 +95,10 @@ export default async function TopicPage({ params }: Props) {
             />
             <h1 className="text-3xl font-extrabold">{name}</h1>
           </div>
+
+          {isWc2026Category(slug) && (
+            <Wc2026SimCTA locale={locale} variant="section" className="mb-8" />
+          )}
 
           {items.length > 0 ? (
             <div className="space-y-4">

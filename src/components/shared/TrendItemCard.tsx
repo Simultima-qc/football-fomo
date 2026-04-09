@@ -4,6 +4,7 @@ import { ExternalLink, Eye, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { TrendBadge } from "./TrendBadge";
 import { CategoryBadge } from "./CategoryBadge";
+import { Wc2026SimCTA, isWc2026Category } from "./Wc2026SimCTA";
 import { cn } from "@/lib/utils";
 
 interface TrendItemCardProps {
@@ -20,7 +21,7 @@ interface TrendItemCardProps {
     mediaUrl?: string | null;
     trendScore: number;
     mustWatch: boolean;
-    category?: { nameEn: string; nameFr: string; color?: string | null } | null;
+    category?: { slug?: string | null; nameEn: string; nameFr: string; color?: string | null } | null;
   };
   locale: string;
   rank?: number;
@@ -126,6 +127,11 @@ export function TrendItemCard({ item, locale, rank, variant = "default" }: Trend
             <ExternalLink className="w-3 h-3" />
             {t("see_source")}
           </a>
+        )}
+
+        {/* WC 2026 sim CTA — shown for national-teams and world-cup-2026 categories */}
+        {isWc2026Category(item.category?.slug) && (
+          <Wc2026SimCTA locale={locale} variant="card" />
         )}
       </div>
     </article>
