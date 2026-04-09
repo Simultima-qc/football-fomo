@@ -137,7 +137,23 @@ export async function getTrendItemsByEntity(entityId: string, limit = 20) {
     .limit(limit);
 
   if (error) { console.error("getTrendItemsByEntity:", error); return []; }
-  return (links ?? []).map((l: any) => l.trendItem).filter(Boolean);
+  return (links ?? [])
+    .map((l: any) => l.trendItem)
+    .filter(Boolean)
+    .sort((a: any, b: any) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+}
+
+export async function getEntitiesByType(entityType: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("entities")
+    .select("id, slug, nameEn, nameFr, imageUrl, country, descriptionEn, descriptionFr")
+    .eq("entityType", entityType)
+    .eq("active", true)
+    .order("nameEn");
+
+  if (error) { console.error("getEntitiesByType:", error); return []; }
+  return data ?? [];
 }
 
 // ─── POSTS ────────────────────────────────────────────────────────────────────

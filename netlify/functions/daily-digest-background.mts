@@ -249,7 +249,7 @@ export default async () => {
     }
   }
 
-  // 6. Insert
+  // 6. Insert — select back real IDs for entity linking
   if (toInsert.length === 0) {
     console.log("[daily-digest] No new items to insert");
     return;
@@ -261,8 +261,76 @@ export default async () => {
 
   if (insertError) {
     console.error("[daily-digest] Insert error:", insertError);
+    return;
+  }
+  console.log(`[daily-digest] ✓ Inserted/updated ${toInsert.length} trend items`);
+
+  // 7. Entity detection — fetch real DB IDs by slug, then keyword-match
+  // NOTE: We cannot rely on the upsert's returned IDs — on slug conflict Supabase
+  // echoes back the UUID we sent in the body, not the row's actual stored id.
+  // A separate SELECT is the only way to get the true primary keys.
+  const slugs = (toInsert as { slug: string }[]).map((i) => i.slug);
+  console.log(`[daily-digest] Step 7 start — querying ${slugs.length} slugs for entity matching`);
+
+  const [
+    { data: realItems, error: realItemsError },
+    { data: entities,  error: entitiesError  },
+  ] = await Promise.all([
+    supabase
+      .from("trend_items")
+      .select("id, titleEn, shortSummaryEn")
+      .in("slug", slugs),
+    supabase
+      .from("entities")
+      .select("id, slug, nameEn")
+      .eq("active", true),
+  ]);
+
+  if (realItemsError) console.error("[daily-digest] Step 7 realItems query error:", realItemsError);
+  if (entitiesError)  console.error("[daily-digest] Step 7 entities query error:", entitiesError);
+  console.log(`[daily-digest] Step 7 — realItems: ${realItems?.length ?? 0}, entities: ${entities?.length ?? 0}`);
+
+  if (!entities || entities.length === 0 || !realItems || realItems.length === 0) {
+    console.log("[daily-digest] Step 7 — skipping entity linking (no items or no entities)");
+    return;
+  }
+
+  // Extra keyword variants for entities whose display name differs from nameEn
+  const ENTITY_VARIANTS: Record<string, string[]> = {
+    "psg":              ["Paris Saint-Germain", "PSG"],
+    "vinicius-jr":      ["Vinicius Jr", "Vinícius", "Vinicius"],
+    "kylian-mbappe":    ["Kylian Mbappé", "Mbappé", "Mbappe", "Kylian Mbappe"],
+    "champions-league": ["UEFA Champions League", "Champions League", "UCL"],
+  };
+
+  type UpsertedItem = { id: string; titleEn: string; shortSummaryEn: string };
+  type EntityRow    = { id: string; slug: string; nameEn: string };
+
+  const entityLinks: { trendItemId: string; entityId: string }[] = [];
+
+  for (const item of realItems as UpsertedItem[]) {
+    const text = `${item.titleEn} ${item.shortSummaryEn}`.toLowerCase();
+    for (const entity of entities as EntityRow[]) {
+      const keywords = ENTITY_VARIANTS[entity.slug] ?? [entity.nameEn];
+      if (keywords.some((kw) => text.includes(kw.toLowerCase()))) {
+        entityLinks.push({ trendItemId: item.id, entityId: entity.id });
+      }
+    }
+  }
+
+  if (entityLinks.length === 0) {
+    console.log("[daily-digest] No entity matches found in new items");
+    return;
+  }
+
+  const { error: linkError } = await supabase
+    .from("trend_item_entities")
+    .upsert(entityLinks, { onConflict: "trendItemId,entityId" });
+
+  if (linkError) {
+    console.error("[daily-digest] Entity link error:", linkError);
   } else {
-    console.log(`[daily-digest] ✓ Inserted ${toInsert.length} trend items`);
+    console.log(`[daily-digest] ✓ Linked ${entityLinks.length} entity relationships`);
   }
 };
 
