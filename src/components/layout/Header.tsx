@@ -30,13 +30,14 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center gap-2 group">
+          <Link href={`/${locale}`} className="flex items-center">
             <Image
               src="/logo-header.png"
               alt="Football FOMO"
-              width={160}
-              height={48}
-              className="h-9 w-auto md:h-12 object-contain"
+              width={885}
+              height={230}
+              className="block h-9 object-contain md:h-11"
+              style={{ width: "auto" }}
               priority
             />
           </Link>
