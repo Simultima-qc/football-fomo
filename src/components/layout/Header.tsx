@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -30,9 +31,14 @@ export function Header() {
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center gap-2 group">
-            <span className="text-xl font-bold tracking-tight text-white group-hover:text-emerald-400 transition-colors">
-              Football<span className="text-emerald-400">FOMO</span>
-            </span>
+            <Image
+              src="/logo.png"
+              alt="Football FOMO"
+              width={160}
+              height={48}
+              className="h-9 w-auto md:h-12 object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop nav */}
