@@ -249,28 +249,24 @@ export default async () => {
     }
   }
 
-  // 6. Insert — select back real IDs for entity linking
+  // 6. Insert new items (skipped if nothing new this run)
   if (toInsert.length === 0) {
     console.log("[daily-digest] No new items to insert");
-    return;
+  } else {
+    const { error: insertError } = await supabase
+      .from("trend_items")
+      .upsert(toInsert, { onConflict: "slug" });
+
+    if (insertError) {
+      console.error("[daily-digest] Insert error:", insertError);
+      return;
+    }
+    console.log(`[daily-digest] ✓ Inserted/updated ${toInsert.length} trend items`);
   }
 
-  const { error: insertError } = await supabase
-    .from("trend_items")
-    .upsert(toInsert, { onConflict: "slug" });
-
-  if (insertError) {
-    console.error("[daily-digest] Insert error:", insertError);
-    return;
-  }
-  console.log(`[daily-digest] ✓ Inserted/updated ${toInsert.length} trend items`);
-
-  // 7. Entity detection — fetch real DB IDs by slug, then keyword-match
-  // NOTE: We cannot rely on the upsert's returned IDs — on slug conflict Supabase
-  // echoes back the UUID we sent in the body, not the row's actual stored id.
-  // A separate SELECT is the only way to get the true primary keys.
-  const slugs = (toInsert as { slug: string }[]).map((i) => i.slug);
-  console.log(`[daily-digest] Step 7 start — querying ${slugs.length} slugs for entity matching`);
+  // 7. Entity detection — runs on ALL today's items regardless of toInsert,
+  // so re-runs are idempotent and a toInsert=0 run still populates entities.
+  console.log(`[daily-digest] Step 7 start — querying today's items for entity matching`);
 
   const [
     { data: realItems, error: realItemsError },
@@ -279,7 +275,7 @@ export default async () => {
     supabase
       .from("trend_items")
       .select("id, titleEn, shortSummaryEn")
-      .in("slug", slugs),
+      .gte("publishDate", today.toISOString()),
     supabase
       .from("entities")
       .select("id, slug, nameEn")
