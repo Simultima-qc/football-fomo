@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import { LatestDailyLink } from "@/components/shared/LatestDailyLink";
 
 export function Footer() {
   const locale = useLocale();
@@ -41,9 +42,9 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href={`/${locale}/daily/${new Date().toISOString().split("T")[0]}`} className="text-sm text-zinc-400 hover:text-white transition-colors">
+                  <LatestDailyLink locale={locale} className="text-sm text-zinc-400 hover:text-white transition-colors">
                     {t("daily")}
-                  </Link>
+                  </LatestDailyLink>
                 </li>
                 <li>
                   <Link href={`/${locale}/newsletter`} className="text-sm text-zinc-400 hover:text-white transition-colors">

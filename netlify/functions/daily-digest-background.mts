@@ -155,7 +155,7 @@ Return this exact JSON structure:
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
-export default async () => {
+const handler = async () => {
   const anthropic = new Anthropic({
     apiKey: Netlify.env.get("ANTHROPIC_API_KEY"),
   });
@@ -329,6 +329,8 @@ export default async () => {
     console.log(`[daily-digest] ✓ Linked ${entityLinks.length} entity relationships`);
   }
 };
+
+export default handler;
 
 export const config: Config = {
   schedule: "0 6 * * *", // Every day at 6:00 UTC

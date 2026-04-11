@@ -7,7 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { TrendItemCard } from "@/components/shared/TrendItemCard";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
-import { getTrendItemsForDate, getDailyRecapPost } from "@/lib/supabase/queries";
+import { getTrendItemsForDate, getDailyRecapPost, getLatestAvailableDate } from "@/lib/supabase/queries";
 import { formatDate } from "@/lib/utils";
 
 interface Props {
@@ -24,8 +24,8 @@ function parseDate(dateStr: string): Date | null {
 
 async function getDailyRecap(date: Date) {
   const [post, trendItems] = await Promise.all([
-    getDailyRecapPost(date),
-    getTrendItemsForDate(date),
+    getDailyRecapPost(date, { throwOnError: true }),
+    getTrendItemsForDate(date, { throwOnError: true }),
   ]);
   return { post, trendItems };
 }
@@ -34,7 +34,6 @@ const BASE_URL = "https://footballfomo.com";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, date } = await params;
-  const t = await getTranslations({ locale, namespace: "meta" });
   const label = locale === "fr" ? `Recap football du ${date}` : `Football recap ${date}`;
 
   return {
@@ -65,18 +64,15 @@ export default async function DailyRecapPage({ params }: Props) {
   prevDate.setUTCDate(prevDate.getUTCDate() - 1);
   const nextDate = new Date(parsedDate);
   nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  const latestAvailableDate = parseDate(await getLatestAvailableDate());
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   const isFuture = parsedDate > today;
+  const canGoNext = latestAvailableDate ? nextDate <= latestAvailableDate : nextDate <= today;
 
   if (isFuture) notFound();
 
-  let data = { post: null, trendItems: [] } as Awaited<ReturnType<typeof getDailyRecap>>;
-  try {
-    data = await getDailyRecap(parsedDate);
-  } catch {
-    // DB not connected
-  }
+  const data = await getDailyRecap(parsedDate);
 
   const { post, trendItems } = data;
   const formattedDate = formatDate(parsedDate, locale);
@@ -126,7 +122,7 @@ export default async function DailyRecapPage({ params }: Props) {
               <span className="text-sm capitalize">{formattedDate}</span>
             </div>
 
-            {nextDate <= today && (
+            {canGoNext && (
               <Link
                 href={`/${locale}/daily/${nextDate.toISOString().split("T")[0]}`}
                 className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
@@ -135,7 +131,7 @@ export default async function DailyRecapPage({ params }: Props) {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             )}
-            {nextDate > today && <div className="w-16" />}
+            {!canGoNext && <div className="w-16" />}
           </div>
 
           {/* Header */}

@@ -6,7 +6,12 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { TrendItemCard } from "@/components/shared/TrendItemCard";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
-import { getEntityBySlug, getTrendItemsByEntity, getEntitiesByType } from "@/lib/supabase/queries";
+import {
+  getEntityBySlug,
+  getTrendItemsByEntity,
+  getEntitiesByType,
+  type TrendItemRecord,
+} from "@/lib/supabase/queries";
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -94,7 +99,7 @@ export default async function PlayerPage({ params }: Props) {
 
           {items.length > 0 ? (
             <div className="space-y-4">
-              {items.map((item: any, i: number) => (
+              {items.map((item: TrendItemRecord, i: number) => (
                 <TrendItemCard key={item.id} item={item} locale={locale} rank={i + 1} variant="default" />
               ))}
             </div>

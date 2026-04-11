@@ -29,7 +29,7 @@ export function NewsletterForm({ variant = "inline", className }: NewsletterForm
         body: JSON.stringify({ email, locale }),
       });
 
-      const data = await res.json();
+      await res.json();
 
       if (res.status === 409) {
         setStatus("duplicate");

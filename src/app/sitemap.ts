@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch category slugs
   const { data: categories } = await supabase
     .from("categories")
-    .select("slug, updatedAt")
+    .select("slug")
     .order("slug");
 
   // Fetch published daily digest dates
@@ -51,11 +51,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
       alternates: localizedAlternates(""),
     },
+    {
+      url: `${BASE_URL}/en/newsletter`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+      alternates: localizedAlternates("/newsletter"),
+    },
+    {
+      url: `${BASE_URL}/fr/newsletter`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+      alternates: localizedAlternates("/newsletter"),
+    },
   ];
 
   const topicRoutes: MetadataRoute.Sitemap = (categories ?? []).map((cat) => ({
     url: `${BASE_URL}/fr/topics/${cat.slug}`,
-    lastModified: cat.updatedAt ? new Date(cat.updatedAt) : new Date(),
+    lastModified: new Date(),
     changeFrequency: "daily" as const,
     priority: 0.8,
     alternates: localizedAlternates(`/topics/${cat.slug}`),

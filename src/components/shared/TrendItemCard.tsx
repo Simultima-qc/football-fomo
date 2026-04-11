@@ -1,28 +1,14 @@
-import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, Eye, Star } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { TrendBadge } from "./TrendBadge";
 import { CategoryBadge } from "./CategoryBadge";
 import { Wc2026SimCTA, isWc2026Category } from "./Wc2026SimCTA";
 import { cn } from "@/lib/utils";
+import type { TrendItemRecord } from "@/lib/supabase/queries";
 
 interface TrendItemCardProps {
-  item: {
-    id: string;
-    slug: string;
-    titleEn: string;
-    titleFr: string;
-    shortSummaryEn: string;
-    shortSummaryFr: string;
-    whyItMattersEn?: string | null;
-    whyItMattersFr?: string | null;
-    sourceUrl?: string | null;
-    mediaUrl?: string | null;
-    trendScore: number;
-    mustWatch: boolean;
-    category?: { slug?: string | null; nameEn: string; nameFr: string; color?: string | null } | null;
-  };
+  item: TrendItemRecord;
   locale: string;
   rank?: number;
   variant?: "default" | "compact" | "featured";

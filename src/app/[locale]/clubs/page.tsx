@@ -3,7 +3,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { getEntitiesByType } from "@/lib/supabase/queries";
+import { getEntitiesByType, type EntitySummary } from "@/lib/supabase/queries";
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -53,7 +53,7 @@ export default async function ClubsIndexPage({ params }: Props) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {entities.map((entity: any) => {
+            {entities.map((entity: EntitySummary) => {
               const name = locale === "fr" ? (entity.nameFr ?? entity.nameEn) : entity.nameEn;
               return (
                 <Link

@@ -1,8 +1,61 @@
 import { createClient } from "./server";
 
+interface QueryOptions {
+  throwOnError?: boolean;
+}
+
+export interface TrendItemCategory {
+  slug?: string | null;
+  nameEn: string;
+  nameFr: string;
+  color?: string | null;
+}
+
+export interface CategoryRecord extends TrendItemCategory {
+  id: string;
+}
+
+export interface TrendItemRecord {
+  id: string;
+  slug: string;
+  titleEn: string;
+  titleFr: string;
+  shortSummaryEn: string;
+  shortSummaryFr: string;
+  whyItMattersEn?: string | null;
+  whyItMattersFr?: string | null;
+  sourceUrl?: string | null;
+  mediaUrl?: string | null;
+  trendScore: number;
+  momentum?: number;
+  mustWatch: boolean;
+  publishDate: string;
+  category?: TrendItemCategory | null;
+}
+
+export interface EntitySummary {
+  id: string;
+  slug: string;
+  nameEn: string;
+  nameFr?: string | null;
+  imageUrl?: string | null;
+  country?: string | null;
+  descriptionEn?: string | null;
+  descriptionFr?: string | null;
+}
+
+export interface EntityRecord extends EntitySummary {
+  entityType: string;
+  active: boolean;
+}
+
+interface TrendItemEntityLink {
+  trendItem: TrendItemRecord | TrendItemRecord[] | null;
+}
+
 // ─── TREND ITEMS ──────────────────────────────────────────────────────────────
 
-export async function getTrendItemsForDate(date: Date) {
+export async function getTrendItemsForDate(date: Date, options: QueryOptions = {}) {
   const supabase = await createClient();
   const start = new Date(date);
   start.setUTCHours(0, 0, 0, 0);
@@ -16,8 +69,12 @@ export async function getTrendItemsForDate(date: Date) {
     .lte("publishDate", end.toISOString())
     .order("trendScore", { ascending: false });
 
-  if (error) { console.error("getTrendItemsForDate:", error); return []; }
-  return data ?? [];
+  if (error) {
+    console.error("getTrendItemsForDate:", error);
+    if (options.throwOnError) throw error;
+    return [];
+  }
+  return (data ?? []) as TrendItemRecord[];
 }
 
 export async function getLatestAvailableDate(): Promise<string> {
@@ -48,7 +105,7 @@ export async function getTop5Today(date?: Date) {
     .limit(5);
 
   if (error) { console.error("getTop5Today:", error); return []; }
-  return data ?? [];
+  return (data ?? []) as TrendItemRecord[];
 }
 
 export async function getExplodingToday(date?: Date) {
@@ -66,7 +123,7 @@ export async function getExplodingToday(date?: Date) {
     .limit(6);
 
   if (error) { console.error("getExplodingToday:", error); return []; }
-  return data ?? [];
+  return (data ?? []) as TrendItemRecord[];
 }
 
 export async function getMustWatchToday(date?: Date) {
@@ -85,7 +142,7 @@ export async function getMustWatchToday(date?: Date) {
     .limit(3);
 
   if (error) { console.error("getMustWatchToday:", error); return []; }
-  return data ?? [];
+  return (data ?? []) as TrendItemRecord[];
 }
 
 // ─── ENTITY PAGES ─────────────────────────────────────────────────────────────
@@ -100,7 +157,7 @@ export async function getEntityBySlug(slug: string) {
     .maybeSingle();
 
   if (error) { console.error("getEntityBySlug:", error); return null; }
-  return data;
+  return data as EntityRecord | null;
 }
 
 export async function getCategoryBySlug(slug: string) {
@@ -112,7 +169,7 @@ export async function getCategoryBySlug(slug: string) {
     .maybeSingle();
 
   if (error) { console.error("getCategoryBySlug:", error); return null; }
-  return data;
+  return data as CategoryRecord | null;
 }
 
 export async function getTrendItemsByCategory(categoryId: string, limit = 20) {
@@ -125,7 +182,7 @@ export async function getTrendItemsByCategory(categoryId: string, limit = 20) {
     .limit(limit);
 
   if (error) { console.error("getTrendItemsByCategory:", error); return []; }
-  return data ?? [];
+  return (data ?? []) as TrendItemRecord[];
 }
 
 export async function getTrendItemsByEntity(entityId: string, limit = 20) {
@@ -137,10 +194,10 @@ export async function getTrendItemsByEntity(entityId: string, limit = 20) {
     .limit(limit);
 
   if (error) { console.error("getTrendItemsByEntity:", error); return []; }
-  return (links ?? [])
-    .map((l: any) => l.trendItem)
-    .filter(Boolean)
-    .sort((a: any, b: any) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+  return ((links ?? []) as unknown as TrendItemEntityLink[])
+    .map((link) => Array.isArray(link.trendItem) ? link.trendItem[0] : link.trendItem)
+    .filter((item): item is TrendItemRecord => Boolean(item))
+    .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
 }
 
 export async function getEntitiesByType(entityType: string) {
@@ -153,12 +210,12 @@ export async function getEntitiesByType(entityType: string) {
     .order("nameEn");
 
   if (error) { console.error("getEntitiesByType:", error); return []; }
-  return data ?? [];
+  return (data ?? []) as EntitySummary[];
 }
 
 // ─── POSTS ────────────────────────────────────────────────────────────────────
 
-export async function getDailyRecapPost(date: Date) {
+export async function getDailyRecapPost(date: Date, options: QueryOptions = {}) {
   const supabase = await createClient();
   const start = new Date(date); start.setUTCHours(0, 0, 0, 0);
   const end = new Date(date); end.setUTCHours(23, 59, 59, 999);
@@ -172,7 +229,11 @@ export async function getDailyRecapPost(date: Date) {
     .lte("publishDate", end.toISOString())
     .maybeSingle();
 
-  if (error) { console.error("getDailyRecapPost:", error); return null; }
+  if (error) {
+    console.error("getDailyRecapPost:", error);
+    if (options.throwOnError) throw error;
+    return null;
+  }
   return data;
 }
 
@@ -181,21 +242,28 @@ export async function getDailyRecapPost(date: Date) {
 export async function subscribeNewsletter(email: string, locale: string) {
   const supabase = await createClient();
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("newsletters")
     .select("id, status")
     .eq("email", email)
     .maybeSingle();
 
+  if (existingError) return { ok: false, reason: "server_error" } as const;
+
   if (existing) {
     if (existing.status === "UNSUBSCRIBED") {
-      await supabase.from("newsletters").update({ status: "ACTIVE", locale }).eq("email", email);
+      const { error: updateError } = await supabase
+        .from("newsletters")
+        .update({ status: "ACTIVE", locale })
+        .eq("email", email);
+
+      if (updateError) return { ok: false, reason: "server_error" } as const;
       return { ok: true };
     }
-    return { ok: false, reason: "already_subscribed" };
+    return { ok: false, reason: "already_subscribed" } as const;
   }
 
   const { error } = await supabase.from("newsletters").insert({ email, locale });
-  if (error) return { ok: false, reason: "server_error" };
+  if (error) return { ok: false, reason: "server_error" } as const;
   return { ok: true };
 }

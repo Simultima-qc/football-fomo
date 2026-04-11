@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { LatestDailyLink } from "@/components/shared/LatestDailyLink";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -16,14 +17,6 @@ export function Header() {
   const otherLocale = locale === "fr" ? "en" : "fr";
   // Build alternate locale URL by replacing the locale prefix
   const altHref = pathname.replace(`/${locale}`, `/${otherLocale}`) || `/${otherLocale}`;
-
-  const navLinks = [
-    { href: `/${locale}`, label: t("home") },
-    { href: `/${locale}/daily/${new Date().toISOString().split("T")[0]}`, label: t("daily") },
-    { href: `/${locale}/topics/world-cup-2026`, label: "World Cup 2026" },
-    // Note: also accessible via /topics/world-cup-2026 (category) or entity page
-    { href: `/${locale}/newsletter`, label: t("newsletter") },
-  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-950/95 backdrop-blur supports-[backdrop-filter]:bg-zinc-950/80">
@@ -44,18 +37,42 @@ export function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-white",
-                  pathname === link.href ? "text-white" : "text-zinc-400"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <Link
+              href={`/${locale}`}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white",
+                pathname === `/${locale}` ? "text-white" : "text-zinc-400"
+              )}
+            >
+              {t("home")}
+            </Link>
+            <LatestDailyLink
+              locale={locale}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white",
+                pathname.includes(`/${locale}/daily/`) ? "text-white" : "text-zinc-400"
+              )}
+            >
+              {t("daily")}
+            </LatestDailyLink>
+            <Link
+              href={`/${locale}/topics/world-cup-2026`}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white",
+                pathname === `/${locale}/topics/world-cup-2026` ? "text-white" : "text-zinc-400"
+              )}
+            >
+              World Cup 2026
+            </Link>
+            <Link
+              href={`/${locale}/newsletter`}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white",
+                pathname === `/${locale}/newsletter` ? "text-white" : "text-zinc-400"
+              )}
+            >
+              {t("newsletter")}
+            </Link>
           </nav>
 
           {/* Right side */}
@@ -94,19 +111,46 @@ export function Header() {
       {menuOpen && (
         <div className="md:hidden border-t border-zinc-800 bg-zinc-950">
           <nav className="flex flex-col px-4 py-3 gap-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-white py-1",
-                  pathname === link.href ? "text-white" : "text-zinc-400"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <Link
+              href={`/${locale}`}
+              onClick={() => setMenuOpen(false)}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white py-1",
+                pathname === `/${locale}` ? "text-white" : "text-zinc-400"
+              )}
+            >
+              {t("home")}
+            </Link>
+            <LatestDailyLink
+              locale={locale}
+              onClick={() => setMenuOpen(false)}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white py-1",
+                pathname.includes(`/${locale}/daily/`) ? "text-white" : "text-zinc-400"
+              )}
+            >
+              {t("daily")}
+            </LatestDailyLink>
+            <Link
+              href={`/${locale}/topics/world-cup-2026`}
+              onClick={() => setMenuOpen(false)}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white py-1",
+                pathname === `/${locale}/topics/world-cup-2026` ? "text-white" : "text-zinc-400"
+              )}
+            >
+              World Cup 2026
+            </Link>
+            <Link
+              href={`/${locale}/newsletter`}
+              onClick={() => setMenuOpen(false)}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-white py-1",
+                pathname === `/${locale}/newsletter` ? "text-white" : "text-zinc-400"
+              )}
+            >
+              {t("newsletter")}
+            </Link>
             <Link
               href={altHref}
               onClick={() => setMenuOpen(false)}

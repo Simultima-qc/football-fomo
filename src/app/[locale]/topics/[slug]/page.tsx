@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Tag } from "lucide-react";
@@ -7,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { TrendItemCard } from "@/components/shared/TrendItemCard";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
-import { getCategoryBySlug, getTrendItemsByCategory } from "@/lib/supabase/queries";
+import { getCategoryBySlug, getTrendItemsByCategory, type TrendItemRecord } from "@/lib/supabase/queries";
 import { Wc2026SimCTA, isWc2026Category } from "@/components/shared/Wc2026SimCTA";
 
 interface Props {
@@ -102,7 +101,7 @@ export default async function TopicPage({ params }: Props) {
 
           {items.length > 0 ? (
             <div className="space-y-4">
-              {items.map((item: any, i: number) => (
+              {items.map((item: TrendItemRecord, i: number) => (
                 <TrendItemCard
                   key={item.id}
                   item={item}
