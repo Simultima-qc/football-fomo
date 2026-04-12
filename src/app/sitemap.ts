@@ -65,6 +65,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
       alternates: localizedAlternates("/newsletter"),
     },
+    {
+      url: `${BASE_URL}/en/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+      alternates: localizedAlternates("/about"),
+    },
+    {
+      url: `${BASE_URL}/fr/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+      alternates: localizedAlternates("/about"),
+    },
+    {
+      url: `${BASE_URL}/en/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+      alternates: localizedAlternates("/privacy"),
+    },
+    {
+      url: `${BASE_URL}/fr/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+      alternates: localizedAlternates("/privacy"),
+    },
   ];
 
   const topicRoutes: MetadataRoute.Sitemap = (categories ?? []).map((cat) => ({

@@ -18,6 +18,7 @@ export const routing = defineRouting({
     "/stories/[slug]": "/stories/[slug]",
     "/newsletter": "/newsletter",
     "/about": "/about",
+    "/privacy": "/privacy",
     "/admin": "/admin",
     "/admin/posts": "/admin/posts",
     "/admin/trend-items": "/admin/trend-items",
