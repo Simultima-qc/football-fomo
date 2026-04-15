@@ -47,6 +47,8 @@ Set in Netlify UI under **Site configuration → Environment variables**. Never 
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API |
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys |
+| `GEMINI_API_KEY` | aistudio.google.com → API Keys |
+| `AI_PROVIDER` | `anthropic` or `gemini` (defaults to `anthropic`) |
 | `NEXT_PUBLIC_SITE_URL` | `https://football-fomo.netlify.app` |
 
 ---
