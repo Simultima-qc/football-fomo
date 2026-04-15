@@ -82,7 +82,7 @@ describe("runDailyDigest", () => {
   it("skips inserts cleanly when nothing survives analysis", async () => {
     const upsertTrendItems = vi.fn(async () => ok({ count: 0 }));
     const summary = await runDailyDigest({
-      anthropic,
+      aiClient: anthropic,
       repository: createRepository({ upsertTrendItems }),
       logger: createLogger(),
       today: new Date("2026-04-13T10:00:00.000Z"),
@@ -97,7 +97,7 @@ describe("runDailyDigest", () => {
 
   it("surfaces trend item upsert failures as failed runs", async () => {
     const summary = await runDailyDigest({
-      anthropic,
+      aiClient: anthropic,
       repository: createRepository({
         upsertTrendItems: async () => failed({ count: 0 }, "trend_items_upsert_failed"),
       }),
@@ -114,7 +114,7 @@ describe("runDailyDigest", () => {
 
   it("keeps the run partial when entity link upsert fails after inserts", async () => {
     const summary = await runDailyDigest({
-      anthropic,
+      aiClient: anthropic,
       repository: createRepository({
         loadLinkingInputs: async () =>
           ok({

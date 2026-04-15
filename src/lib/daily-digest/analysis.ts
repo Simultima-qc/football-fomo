@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-import { CATEGORY_SLUGS, type AnalyzeArticleResult, type AnthropicClientLike, type ParsedAnalysisResult, type RawArticle } from "./types";
+import {
+  CATEGORY_SLUGS,
+  type AnalyzeArticleResult,
+  type AnthropicClientLike,
+  type GeminiClientLike,
+  type ParsedAnalysisResult,
+  type RawArticle,
+} from "./types";
 
 const articleAnalysisSchema = z
   .object({
