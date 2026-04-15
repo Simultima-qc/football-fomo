@@ -15,6 +15,14 @@ export function formatDate(date: Date | string, locale: string): string {
   });
 }
 
+export function getUtcDateString(date: Date = new Date()): string {
+  return date.toISOString().split("T")[0];
+}
+
+export function isCurrentUtcDate(date: string, now: Date = new Date()): boolean {
+  return date === getUtcDateString(now);
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

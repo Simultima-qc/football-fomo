@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { TrendItemCard } from "@/components/shared/TrendItemCard";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
 import { getTop5Today, getExplodingToday, getMustWatchToday, getLatestAvailableDate } from "@/lib/supabase/queries";
+import { formatDate, isCurrentUtcDate } from "@/lib/utils";
 
 const BASE_URL = "https://footballfomo.com";
 
@@ -58,6 +59,22 @@ export default async function HomePage({
   const data = await getHomepageData();
 
   const { top5, exploding, mustWatch, latestDate: todayDate } = data;
+  const isFreshDigest = isCurrentUtcDate(todayDate);
+  const displayDate = formatDate(`${todayDate}T12:00:00Z`, locale);
+  const statusLabel = isFreshDigest
+    ? locale === "fr"
+      ? "Mis a jour · Aujourd'hui"
+      : "Updated · Today"
+    : locale === "fr"
+      ? `Derniere mise a jour · ${displayDate}`
+      : `Last updated · ${displayDate}`;
+  const recapTitle = isFreshDigest
+    ? locale === "fr"
+      ? "Recap complet d'aujourd'hui"
+      : "Today's full recap"
+    : locale === "fr"
+      ? "Dernier recap complet"
+      : "Latest full recap";
 
   return (
     <>
@@ -70,7 +87,7 @@ export default async function HomePage({
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-6">
                 <Flame className="w-3 h-3" />
-                {locale === "fr" ? "Mis à jour · Aujourd'hui" : "Updated · Today"}
+                {statusLabel}
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-4">
                 {t("hero_title")}
@@ -183,9 +200,9 @@ export default async function HomePage({
               <Calendar className="w-5 h-5 text-zinc-500" />
               <div>
                 <p className="text-sm font-semibold text-white">
-                  {locale === "fr" ? "Recap complet d'aujourd'hui" : "Today's full recap"}
+                  {recapTitle}
                 </p>
-                <p className="text-xs text-zinc-500">{todayDate}</p>
+                <p className="text-xs text-zinc-500">{displayDate}</p>
               </div>
             </div>
             <Link
@@ -209,3 +226,4 @@ function EmptyState({ locale }: { locale: string }) {
     </div>
   );
 }
+
