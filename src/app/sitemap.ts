@@ -27,15 +27,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select("slug")
     .order("slug");
 
-  // Fetch published daily digest dates
-  const { data: posts } = await supabase
-    .from("posts")
-    .select("publishDate")
-    .eq("type", "DAILY_RECAP")
-    .eq("status", "PUBLISHED")
-    .order("publishDate", { ascending: false })
-    .limit(90);
-
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `${BASE_URL}/en`,
@@ -103,16 +94,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     alternates: localizedAlternates(`/topics/${cat.slug}`),
   }));
 
-  const dailyRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post) => {
-    const date = post.publishDate.slice(0, 10);
-    return {
-      url: `${BASE_URL}/fr/daily/${date}`,
-      lastModified: new Date(post.publishDate),
-      changeFrequency: "never" as const,
-      priority: 0.6,
-      alternates: localizedAlternates(`/daily/${date}`),
-    };
-  });
-
-  return [...staticRoutes, ...topicRoutes, ...dailyRoutes];
+  return [...staticRoutes, ...topicRoutes];
 }
