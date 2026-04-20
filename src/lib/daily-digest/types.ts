@@ -216,10 +216,9 @@ export interface AnalyzeArticleResult {
   issue?: StepIssue;
 }
 
-export type AnalyzeArticleFn = (
-  client: any,
-  article: RawArticle
-) => Promise<AnalyzeArticleResult>;
+export type AnalyzeArticleFn = {
+  bivarianceHack(client: AIClient, article: RawArticle): Promise<AnalyzeArticleResult>;
+}["bivarianceHack"];
 
 export interface ParsedAnalysisSuccess {
   ok: true;

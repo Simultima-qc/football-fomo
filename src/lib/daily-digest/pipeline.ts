@@ -9,7 +9,6 @@ import {
   MAX_ARTICLES_TO_ANALYZE,
   type AIClient,
   type AnalyzeArticleFn,
-  type AnalyzeArticleResult,
   type DailyDigestLogger,
   type DailyDigestRepository,
   type DailyDigestRunSummary,

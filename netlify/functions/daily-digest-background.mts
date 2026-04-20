@@ -6,7 +6,11 @@ import { createClient } from "@supabase/supabase-js";
 import { analyzeArticleClaude, analyzeArticleGemini } from "../../src/lib/daily-digest/analysis";
 import { runDailyDigest } from "../../src/lib/daily-digest/pipeline";
 import { createDailyDigestRepository } from "../../src/lib/daily-digest/repository";
-import type { DailyDigestLogger } from "../../src/lib/daily-digest/types";
+import type {
+  AIClient,
+  AnalyzeArticleFn,
+  DailyDigestLogger,
+} from "../../src/lib/daily-digest/types";
 
 const logger: DailyDigestLogger = {
   info(message, meta) {
@@ -20,28 +24,59 @@ const logger: DailyDigestLogger = {
   },
 };
 
-const handler = async () => {
-  const aiProvider = Netlify.env.get("AI_PROVIDER") || "anthropic";
-  let aiClient: any;
-  let analyzeArticle: any;
+type DailyDigestAiProvider = "anthropic" | "gemini";
+
+interface DailyDigestAiSelection {
+  aiClient: AIClient;
+  analyzeArticle: AnalyzeArticleFn;
+  provider: DailyDigestAiProvider;
+}
+
+interface DailyDigestAiFactories {
+  createAnthropicClient?: (apiKey: string) => AIClient;
+  createGeminiClient?: (apiKey: string) => AIClient;
+}
+
+export function selectDailyDigestAiProvider(
+  getEnv: (key: string) => string | undefined = (key) => Netlify.env.get(key),
+  log: DailyDigestLogger = logger,
+  factories: DailyDigestAiFactories = {}
+): DailyDigestAiSelection {
+  const aiProvider = getEnv("AI_PROVIDER") || "anthropic";
 
   if (aiProvider === "gemini") {
-    const apiKey = Netlify.env.get("GEMINI_API_KEY");
+    const apiKey = getEnv("GEMINI_API_KEY");
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set but AI_PROVIDER is gemini");
     }
-    aiClient = new GoogleGenerativeAI(apiKey);
-    analyzeArticle = analyzeArticleGemini;
-    logger.info("[daily-digest] Using Gemini provider");
-  } else {
-    const apiKey = Netlify.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) {
-      throw new Error("ANTHROPIC_API_KEY is not set but AI_PROVIDER is anthropic");
-    }
-    aiClient = new Anthropic({ apiKey });
-    analyzeArticle = analyzeArticleClaude;
-    logger.info("[daily-digest] Using Anthropic provider");
+
+    log.info("[daily-digest] Using Gemini provider");
+    return {
+      aiClient:
+        factories.createGeminiClient?.(apiKey) ??
+        (new GoogleGenerativeAI(apiKey) as AIClient),
+      analyzeArticle: analyzeArticleGemini as AnalyzeArticleFn,
+      provider: "gemini",
+    };
   }
+
+  const apiKey = getEnv("ANTHROPIC_API_KEY");
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not set but AI_PROVIDER is anthropic");
+  }
+
+  log.info("[daily-digest] Using Anthropic provider");
+  return {
+    aiClient:
+      factories.createAnthropicClient?.(apiKey) ??
+      (new Anthropic({ apiKey }) as AIClient),
+    analyzeArticle: analyzeArticleClaude as AnalyzeArticleFn,
+    provider: "anthropic",
+  };
+}
+
+const handler = async () => {
+  const { aiClient, analyzeArticle } = selectDailyDigestAiProvider();
 
   const supabase = createClient(
     Netlify.env.get("NEXT_PUBLIC_SUPABASE_URL")!,

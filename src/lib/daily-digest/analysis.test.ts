@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { analyzeArticleGemini, parseArticleAnalysisResponse } from "./analysis";
-import { type RawArticle } from "./types";
+import type { GeminiClientLike, RawArticle } from "./types";
 
 function buildValidPayload() {
   return {
@@ -41,11 +41,11 @@ describe("analyzeArticleGemini", () => {
     const mockModel = {
       generateContent: vi.fn().mockResolvedValue(mockResponse),
     };
-    const mockClient = {
+    const mockClient: GeminiClientLike = {
       getGenerativeModel: vi.fn().mockReturnValue(mockModel),
     };
 
-    const result = await analyzeArticleGemini(mockClient as any, mockArticle);
+    const result = await analyzeArticleGemini(mockClient, mockArticle);
 
     expect(result.status).toBe("accepted");
     expect(result.analysis?.slug).toBe("arsenal-transfer-update");
@@ -61,11 +61,11 @@ describe("analyzeArticleGemini", () => {
     const mockModel = {
       generateContent: vi.fn().mockResolvedValue(mockResponse),
     };
-    const mockClient = {
+    const mockClient: GeminiClientLike = {
       getGenerativeModel: vi.fn().mockReturnValue(mockModel),
     };
 
-    const result = await analyzeArticleGemini(mockClient as any, mockArticle);
+    const result = await analyzeArticleGemini(mockClient, mockArticle);
 
     expect(result.status).toBe("rejected");
     expect(result.issue?.code).toBe("ai_marked_non_football");
@@ -75,11 +75,11 @@ describe("analyzeArticleGemini", () => {
     const mockModel = {
       generateContent: vi.fn().mockRejectedValue(new Error("API Error")),
     };
-    const mockClient = {
+    const mockClient: GeminiClientLike = {
       getGenerativeModel: vi.fn().mockReturnValue(mockModel),
     };
 
-    const result = await analyzeArticleGemini(mockClient as any, mockArticle);
+    const result = await analyzeArticleGemini(mockClient, mockArticle);
 
     expect(result.status).toBe("failed");
     expect(result.issue?.code).toBe("gemini_request_failed");
