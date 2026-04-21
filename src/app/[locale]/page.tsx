@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { ArrowRight, ExternalLink, Flame } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -90,9 +89,10 @@ export default async function HomePage({
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-3">
               {t("hero_title")}
             </h1>
-            <p className="text-base md:text-lg text-zinc-400 mb-8 max-w-sm mx-auto">
+            <p className="text-base md:text-lg text-zinc-400 mb-3 max-w-sm mx-auto">
               {t("hero_subtitle")}
             </p>
+            <p className="text-sm text-zinc-500 mb-8">{t("hero_proof")}</p>
             <GaLink
               href={`/${locale}/daily/${todayDate}`}
               gaEvent="hero_cta"
@@ -111,7 +111,7 @@ export default async function HomePage({
               {t("top_news_title")}
             </h2>
             {top5.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {top5.slice(0, 3).map((item, i) => (
                   <TopNewsCard
                     key={item.id}
@@ -119,6 +119,7 @@ export default async function HomePage({
                     locale={locale}
                     rank={i}
                     dailyHref={`/${locale}/daily/${todayDate}`}
+                    isTop={i === 0}
                   />
                 ))}
               </div>
@@ -148,12 +149,14 @@ export default async function HomePage({
             <p className="text-xl font-bold text-white mb-5">
               {t("retention_text")}
             </p>
-            <Link
+            <GaLink
               href={`/${locale}/newsletter`}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold transition-colors"
+              gaEvent="newsletter_cta"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-base transition-colors"
             >
               {t("retention_cta")} <ArrowRight className="w-4 h-4" />
-            </Link>
+            </GaLink>
+            <p className="mt-3 text-sm text-zinc-500">{t("retention_tagline")}</p>
           </section>
 
           {/* 5. SECTIONS LIGUES */}
@@ -188,11 +191,13 @@ function TopNewsCard({
   locale,
   rank,
   dailyHref,
+  isTop = false,
 }: {
   item: TrendItemRecord;
   locale: string;
   rank: number;
   dailyHref: string;
+  isTop?: boolean;
 }) {
   const title = locale === "fr" ? item.titleFr : item.titleEn;
   const summary = locale === "fr" ? item.shortSummaryFr : item.shortSummaryEn;
@@ -202,8 +207,15 @@ function TopNewsCard({
       href={dailyHref}
       gaEvent="top_news_click"
       gaParams={{ item_id: item.id, rank: rank + 1 }}
-      className="block rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-zinc-700 hover:bg-zinc-900 p-4 transition-all"
+      className={`block rounded-xl border bg-zinc-900/60 hover:bg-zinc-900 transition-all ${
+        isTop
+          ? "border-emerald-500/30 hover:border-emerald-500/50 p-5 sm:row-span-2"
+          : "border-zinc-800 hover:border-zinc-700 p-4"
+      }`}
     >
+      {isTop && (
+        <div className="mb-2 text-xs font-semibold text-orange-400">🔥 Top story</div>
+      )}
       {item.category && (
         <CategoryBadge
           nameEn={item.category.nameEn}
@@ -212,8 +224,12 @@ function TopNewsCard({
           locale={locale}
         />
       )}
-      <h3 className="mt-2 text-sm font-bold text-white leading-snug line-clamp-3">{title}</h3>
-      <p className="mt-1.5 text-xs text-zinc-400 line-clamp-2">{summary}</p>
+      <h3 className={`mt-2 font-bold text-white leading-snug line-clamp-3 ${isTop ? "text-xl" : "text-sm"}`}>
+        {title}
+      </h3>
+      <p className={`mt-1.5 text-zinc-400 line-clamp-2 ${isTop ? "text-sm" : "text-xs"}`}>
+        {summary}
+      </p>
     </GaLink>
   );
 }
