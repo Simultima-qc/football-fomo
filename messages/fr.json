@@ -7,9 +7,14 @@
     "about": "À propos"
   },
   "home": {
-    "hero_title": "Tout ce que tu dois voir aujourd'hui dans le football",
-    "hero_subtitle": "Le top des sujets, moments et tendances des dernières 24h — en 2 minutes.",
-    "hero_cta": "Voir le top 5 d'aujourd'hui",
+    "hero_title": "Toute l'actualité foot résumée en 2 minutes",
+    "hero_subtitle": "Les infos importantes du jour. Sans bruit. Sans perte de temps.",
+    "hero_cta": "Voir les news du jour",
+    "top_news_title": "Top news",
+    "digest_title": "Digest complet",
+    "retention_text": "Ne manque plus aucune info importante",
+    "retention_cta": "Revenir demain",
+    "leagues_title": "Par ligue",
     "top5_title": "Top 5 du jour",
     "exploding_title": "Ce qui explose",
     "mustwatch_title": "Clips à voir",

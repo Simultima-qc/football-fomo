@@ -7,9 +7,14 @@
     "about": "About"
   },
   "home": {
-    "hero_title": "Everything you need to see in football today",
-    "hero_subtitle": "The top stories, moments and trends from the last 24h — in 2 minutes.",
-    "hero_cta": "See today's top 5",
+    "hero_title": "All football news summarized in 2 minutes",
+    "hero_subtitle": "The important news of the day. No noise. No wasted time.",
+    "hero_cta": "See today's news",
+    "top_news_title": "Top news",
+    "digest_title": "Full digest",
+    "retention_text": "Never miss important news again",
+    "retention_cta": "Come back tomorrow",
+    "leagues_title": "By league",
     "top5_title": "Top 5 Today",
     "exploding_title": "What's Exploding",
     "mustwatch_title": "Must-Watch Clips",

@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { ArrowRight, Flame, TrendingUp, Play, Calendar } from "lucide-react";
+import { ArrowRight, ExternalLink, Flame } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { TrendItemCard } from "@/components/shared/TrendItemCard";
-import { NewsletterForm } from "@/components/shared/NewsletterForm";
-import { getTop5Today, getExplodingToday, getMustWatchToday, getLatestAvailableDate } from "@/lib/supabase/queries";
+import { GaLink } from "@/components/shared/GaLink";
+import { CategoryBadge } from "@/components/shared/CategoryBadge";
+import { getTop5Today, getExplodingToday, getLatestAvailableDate } from "@/lib/supabase/queries";
 import { formatDate, isCurrentUtcDate } from "@/lib/utils";
+import type { TrendItemRecord } from "@/lib/supabase/queries";
 
 const BASE_URL = "https://footballfomo.com";
+
+const LEAGUES = [
+  { name: "Premier League", slug: "premier-league" },
+  { name: "Liga", slug: "la-liga" },
+  { name: "Serie A", slug: "serie-a" },
+  { name: "MLS", slug: "mls" },
+] as const;
 
 export async function generateMetadata({
   params,
@@ -40,12 +48,11 @@ export async function generateMetadata({
 async function getHomepageData() {
   const latestDate = await getLatestAvailableDate();
   const date = new Date(latestDate + "T12:00:00Z");
-  const [top5, exploding, mustWatch] = await Promise.all([
+  const [top5, exploding] = await Promise.all([
     getTop5Today(date),
     getExplodingToday(date),
-    getMustWatchToday(date),
   ]);
-  return { top5, exploding, mustWatch, latestDate };
+  return { top5, exploding, latestDate };
 }
 
 export default async function HomePage({
@@ -56,88 +63,62 @@ export default async function HomePage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
 
-  const data = await getHomepageData();
+  const { top5, exploding, latestDate: todayDate } = await getHomepageData();
 
-  const { top5, exploding, mustWatch, latestDate: todayDate } = data;
   const isFreshDigest = isCurrentUtcDate(todayDate);
   const displayDate = formatDate(`${todayDate}T12:00:00Z`, locale);
   const statusLabel = isFreshDigest
     ? locale === "fr"
-      ? "Mis a jour · Aujourd'hui"
+      ? "Mis à jour · Aujourd'hui"
       : "Updated · Today"
     : locale === "fr"
-      ? `Derniere mise a jour · ${displayDate}`
+      ? `Dernière mise à jour · ${displayDate}`
       : `Last updated · ${displayDate}`;
-  const recapTitle = isFreshDigest
-    ? locale === "fr"
-      ? "Recap complet d'aujourd'hui"
-      : "Today's full recap"
-    : locale === "fr"
-      ? "Dernier recap complet"
-      : "Latest full recap";
 
   return (
     <>
       <Header />
       <main className="flex-1 bg-zinc-950 text-white">
-        {/* HERO */}
-        <section className="relative overflow-hidden border-b border-zinc-800">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent pointer-events-none" />
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-6">
-                <Flame className="w-3 h-3" />
-                {statusLabel}
-              </div>
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-4">
-                {t("hero_title")}
-              </h1>
-              <p className="text-lg text-zinc-400 mb-8">
-                {t("hero_subtitle")}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  href={`/${locale}/daily/${todayDate}`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold transition-colors"
-                >
-                  {t("hero_cta")}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href={`/${locale}/newsletter`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold transition-colors"
-                >
-                  {locale === "fr" ? "Recevoir le digest" : "Get the digest"}
-                </Link>
-              </div>
+
+        {/* 1. HERO */}
+        <section className="border-b border-zinc-800 bg-gradient-to-b from-emerald-950/30 to-zinc-950">
+          <div className="mx-auto max-w-2xl px-4 py-12 md:py-20 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-5">
+              <Flame className="w-3 h-3" />
+              {statusLabel}
             </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-3">
+              {t("hero_title")}
+            </h1>
+            <p className="text-base md:text-lg text-zinc-400 mb-8 max-w-sm mx-auto">
+              {t("hero_subtitle")}
+            </p>
+            <GaLink
+              href={`/${locale}/daily/${todayDate}`}
+              gaEvent="hero_cta"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-base transition-colors"
+            >
+              {t("hero_cta")} <ArrowRight className="w-5 h-5" />
+            </GaLink>
           </div>
         </section>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-          {/* TOP 5 */}
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-12">
+
+          {/* 2. TOP NEWS */}
           <section>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Flame className="w-5 h-5 text-red-400" />
-                <h2 className="text-xl font-bold">{t("top5_title")}</h2>
-              </div>
-              <Link
-                href={`/${locale}/daily/${todayDate}`}
-                className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-1"
-              >
-                {t("recap_cta")} <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4">
+              {t("top_news_title")}
+            </h2>
             {top5.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-3">
                 {top5.slice(0, 3).map((item, i) => (
-                  <TrendItemCard
+                  <TopNewsCard
                     key={item.id}
                     item={item}
                     locale={locale}
-                    rank={i + 1}
-                    variant={i === 0 ? "featured" : "default"}
+                    rank={i}
+                    dailyHref={`/${locale}/daily/${todayDate}`}
                   />
                 ))}
               </div>
@@ -146,22 +127,15 @@ export default async function HomePage({
             )}
           </section>
 
-          {/* WHAT'S EXPLODING */}
+          {/* 3. DIGEST COMPLET */}
           <section>
-            <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="w-5 h-5 text-amber-400" />
-              <h2 className="text-xl font-bold">{t("exploding_title")}</h2>
-            </div>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+              {t("digest_title")}
+            </h2>
             {exploding.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {exploding.map((item, i) => (
-                  <TrendItemCard
-                    key={item.id}
-                    item={item}
-                    locale={locale}
-                    rank={i + 1}
-                    variant="compact"
-                  />
+              <div className="divide-y divide-zinc-800/60">
+                {exploding.map((item) => (
+                  <DigestItem key={item.id} item={item} locale={locale} />
                 ))}
               </div>
             ) : (
@@ -169,49 +143,39 @@ export default async function HomePage({
             )}
           </section>
 
-          {/* MUST WATCH */}
-          {mustWatch.length > 0 && (
-            <section>
-              <div className="flex items-center gap-2 mb-6">
-                <Play className="w-5 h-5 text-violet-400" />
-                <h2 className="text-xl font-bold">{t("mustwatch_title")}</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {mustWatch.map((item) => (
-                  <TrendItemCard
-                    key={item.id}
-                    item={item}
-                    locale={locale}
-                    variant="default"
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* NEWSLETTER */}
-          <section>
-            <NewsletterForm variant="section" />
-          </section>
-
-          {/* DAILY RECAP CTA */}
-          <section className="flex items-center justify-between p-5 rounded-xl bg-zinc-900 border border-zinc-800">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-zinc-500" />
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  {recapTitle}
-                </p>
-                <p className="text-xs text-zinc-500">{displayDate}</p>
-              </div>
-            </div>
+          {/* 4. CTA RETENTION */}
+          <section className="rounded-xl border border-zinc-700 bg-zinc-900 px-6 py-8 text-center">
+            <p className="text-xl font-bold text-white mb-5">
+              {t("retention_text")}
+            </p>
             <Link
-              href={`/${locale}/daily/${todayDate}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm font-medium text-white transition-colors"
+              href={`/${locale}/newsletter`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold transition-colors"
             >
-              {t("recap_cta")} <ArrowRight className="w-3 h-3" />
+              {t("retention_cta")} <ArrowRight className="w-4 h-4" />
             </Link>
           </section>
+
+          {/* 5. SECTIONS LIGUES */}
+          <section>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4">
+              {t("leagues_title")}
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {LEAGUES.map((league) => (
+                <GaLink
+                  key={league.slug}
+                  href={`/${locale}/topics/${league.slug}`}
+                  gaEvent="league_click"
+                  gaParams={{ league: league.name }}
+                  className="px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-sm font-medium text-zinc-300 hover:border-emerald-500/50 hover:text-white transition-colors"
+                >
+                  {league.name}
+                </GaLink>
+              ))}
+            </div>
+          </section>
+
         </div>
       </main>
       <Footer />
@@ -219,11 +183,73 @@ export default async function HomePage({
   );
 }
 
-function EmptyState({ locale }: { locale: string }) {
+function TopNewsCard({
+  item,
+  locale,
+  rank,
+  dailyHref,
+}: {
+  item: TrendItemRecord;
+  locale: string;
+  rank: number;
+  dailyHref: string;
+}) {
+  const title = locale === "fr" ? item.titleFr : item.titleEn;
+  const summary = locale === "fr" ? item.shortSummaryFr : item.shortSummaryEn;
+
   return (
-    <div className="flex items-center justify-center h-32 rounded-xl border border-dashed border-zinc-800 text-zinc-600 text-sm">
-      {locale === "fr" ? "Aucun contenu pour le moment." : "No content yet."}
+    <GaLink
+      href={dailyHref}
+      gaEvent="top_news_click"
+      gaParams={{ item_id: item.id, rank: rank + 1 }}
+      className="block rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-zinc-700 hover:bg-zinc-900 p-4 transition-all"
+    >
+      {item.category && (
+        <CategoryBadge
+          nameEn={item.category.nameEn}
+          nameFr={item.category.nameFr}
+          color={item.category.color}
+          locale={locale}
+        />
+      )}
+      <h3 className="mt-2 text-sm font-bold text-white leading-snug line-clamp-3">{title}</h3>
+      <p className="mt-1.5 text-xs text-zinc-400 line-clamp-2">{summary}</p>
+    </GaLink>
+  );
+}
+
+function DigestItem({ item, locale }: { item: TrendItemRecord; locale: string }) {
+  const title = locale === "fr" ? item.titleFr : item.titleEn;
+  const summary = locale === "fr" ? item.shortSummaryFr : item.shortSummaryEn;
+  const source = item.sourceUrl
+    ? new URL(item.sourceUrl).hostname.replace("www.", "")
+    : null;
+
+  return (
+    <div className="py-3.5 flex items-start gap-4">
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm font-semibold text-white leading-snug">{title}</h3>
+        <p className="mt-0.5 text-xs text-zinc-500 line-clamp-2">{summary}</p>
+        {source && (
+          <a
+            href={item.sourceUrl!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-emerald-400 transition-colors"
+          >
+            <ExternalLink className="w-3 h-3" />
+            {source}
+          </a>
+        )}
+      </div>
     </div>
   );
 }
 
+function EmptyState({ locale }: { locale: string }) {
+  return (
+    <div className="flex items-center justify-center h-24 rounded-xl border border-dashed border-zinc-800 text-zinc-600 text-sm">
+      {locale === "fr" ? "Aucun contenu pour le moment." : "No content yet."}
+    </div>
+  );
+}
