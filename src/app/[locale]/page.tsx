@@ -134,7 +134,7 @@ export default async function HomePage({
               {t("digest_title")}
             </h2>
             {exploding.length > 0 ? (
-              <div className="divide-y divide-zinc-800/60">
+              <div className="divide-y divide-zinc-700/80">
                 {exploding.map((item) => (
                   <DigestItem key={item.id} item={item} locale={locale} />
                 ))}
@@ -160,8 +160,8 @@ export default async function HomePage({
           </section>
 
           {/* 5. SECTIONS LIGUES */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4">
+          <section className="pt-4">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-4">
               {t("leagues_title")}
             </h2>
             <div className="flex flex-wrap gap-3">
@@ -207,14 +207,16 @@ function TopNewsCard({
       href={dailyHref}
       gaEvent="top_news_click"
       gaParams={{ item_id: item.id, rank: rank + 1 }}
-      className={`block rounded-xl border bg-zinc-900/60 hover:bg-zinc-900 transition-all ${
+      className={`block rounded-xl border cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg ${
         isTop
-          ? "border-emerald-500/30 hover:border-emerald-500/50 p-5 sm:row-span-2"
-          : "border-zinc-800 hover:border-zinc-700 p-4"
+          ? "bg-zinc-800/80 border-emerald-500/60 hover:border-emerald-500/70 p-5 sm:row-span-2"
+          : "bg-zinc-900/60 border-zinc-800 hover:border-emerald-500/40 hover:bg-zinc-900 p-4"
       }`}
     >
       {isTop && (
-        <div className="mb-2 text-xs font-semibold text-orange-400">🔥 Top story</div>
+        <div className="mb-1 text-xs font-semibold text-emerald-400">
+          {locale === "fr" ? "#1 aujourd'hui" : "#1 today"}
+        </div>
       )}
       {item.category && (
         <CategoryBadge
@@ -242,10 +244,10 @@ function DigestItem({ item, locale }: { item: TrendItemRecord; locale: string })
     : null;
 
   return (
-    <div className="py-3.5 flex items-start gap-4">
+    <div className="py-4 px-2 -mx-2 rounded-lg flex items-start gap-4 hover:bg-zinc-800/50 transition-colors duration-150">
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-white leading-snug">{title}</h3>
-        <p className="mt-0.5 text-xs text-zinc-500 line-clamp-2">{summary}</p>
+        <h3 className="text-base font-semibold text-white leading-snug">{title}</h3>
+        <p className="mt-1 text-xs text-zinc-500 line-clamp-2">{summary}</p>
         {source && (
           <a
             href={item.sourceUrl!}
