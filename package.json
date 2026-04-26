@@ -2,12 +2,23 @@
   "name": "tmp",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.12.1",
+  "engines": {
+    "node": ">=20.19 <21",
+    "npm": ">=11 <12"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:ci": "node scripts/with-build-env.mjs npm run build:ci:steps",
+    "build:ci:steps": "npm run prisma:validate && npm run prisma:generate && npm run build",
     "start": "next start",
     "lint": "eslint",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
     "test": "vitest run",
+    "validate": "node scripts/with-build-env.mjs npm run validate:steps",
+    "validate:steps": "npm run prisma:validate && npm run prisma:generate && npm run lint && npm run test && npm run build",
     "seed": "dotenv -e .env -- tsx prisma/seed.ts"
   },
   "prisma": {

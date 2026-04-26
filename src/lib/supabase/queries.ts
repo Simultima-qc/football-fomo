@@ -1,5 +1,9 @@
 import { createClient } from "./server";
 
+function usesBuildPlaceholderData() {
+  return process.env.SUPABASE_BUILD_PLACEHOLDER === "1";
+}
+
 interface QueryOptions {
   throwOnError?: boolean;
 }
@@ -56,6 +60,8 @@ interface TrendItemEntityLink {
 // ─── TREND ITEMS ──────────────────────────────────────────────────────────────
 
 export async function getTrendItemsForDate(date: Date, options: QueryOptions = {}) {
+  if (usesBuildPlaceholderData()) return [];
+
   const supabase = await createClient();
   const start = new Date(date);
   start.setUTCHours(0, 0, 0, 0);
@@ -78,6 +84,8 @@ export async function getTrendItemsForDate(date: Date, options: QueryOptions = {
 }
 
 export async function getLatestAvailableDate(): Promise<string> {
+  if (usesBuildPlaceholderData()) return new Date().toISOString().split("T")[0];
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("trend_items")
@@ -91,6 +99,8 @@ export async function getLatestAvailableDate(): Promise<string> {
 }
 
 export async function getTop5Today(date?: Date) {
+  if (usesBuildPlaceholderData()) return [];
+
   const supabase = await createClient();
   const base = date ?? new Date();
   const start = new Date(base); start.setUTCHours(0, 0, 0, 0);
@@ -109,6 +119,8 @@ export async function getTop5Today(date?: Date) {
 }
 
 export async function getExplodingToday(date?: Date) {
+  if (usesBuildPlaceholderData()) return [];
+
   const supabase = await createClient();
   const base = date ?? new Date();
   const start = new Date(base); start.setUTCHours(0, 0, 0, 0);
@@ -127,6 +139,8 @@ export async function getExplodingToday(date?: Date) {
 }
 
 export async function getMustWatchToday(date?: Date) {
+  if (usesBuildPlaceholderData()) return [];
+
   const supabase = await createClient();
   const base = date ?? new Date();
   const start = new Date(base); start.setUTCHours(0, 0, 0, 0);
@@ -148,6 +162,8 @@ export async function getMustWatchToday(date?: Date) {
 // ─── ENTITY PAGES ─────────────────────────────────────────────────────────────
 
 export async function getEntityBySlug(slug: string) {
+  if (usesBuildPlaceholderData()) return null;
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("entities")
@@ -161,6 +177,8 @@ export async function getEntityBySlug(slug: string) {
 }
 
 export async function getCategoryBySlug(slug: string) {
+  if (usesBuildPlaceholderData()) return null;
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
@@ -173,6 +191,8 @@ export async function getCategoryBySlug(slug: string) {
 }
 
 export async function getTrendItemsByCategory(categoryId: string, limit = 20) {
+  if (usesBuildPlaceholderData()) return [];
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("trend_items")
@@ -186,6 +206,8 @@ export async function getTrendItemsByCategory(categoryId: string, limit = 20) {
 }
 
 export async function getTrendItemsByEntity(entityId: string, limit = 20) {
+  if (usesBuildPlaceholderData()) return [];
+
   const supabase = await createClient();
   const { data: links, error } = await supabase
     .from("trend_item_entities")
@@ -201,6 +223,8 @@ export async function getTrendItemsByEntity(entityId: string, limit = 20) {
 }
 
 export async function getEntitiesByType(entityType: string) {
+  if (usesBuildPlaceholderData()) return [];
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("entities")
@@ -216,6 +240,8 @@ export async function getEntitiesByType(entityType: string) {
 // ─── POSTS ────────────────────────────────────────────────────────────────────
 
 export async function getDailyRecapPost(date: Date, options: QueryOptions = {}) {
+  if (usesBuildPlaceholderData()) return null;
+
   const supabase = await createClient();
   const start = new Date(date); start.setUTCHours(0, 0, 0, 0);
   const end = new Date(date); end.setUTCHours(23, 59, 59, 999);
@@ -240,6 +266,10 @@ export async function getDailyRecapPost(date: Date, options: QueryOptions = {}) 
 // ─── NEWSLETTER ───────────────────────────────────────────────────────────────
 
 export async function subscribeNewsletter(email: string, locale: string) {
+  if (usesBuildPlaceholderData()) {
+    return { ok: false, reason: "server_error" } as const;
+  }
+
   const supabase = await createClient();
 
   const { data: existing, error: existingError } = await supabase

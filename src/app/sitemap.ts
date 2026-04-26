@@ -16,17 +16,6 @@ function localizedAlternates(path: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  // Fetch category slugs
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("slug")
-    .order("slug");
-
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `${BASE_URL}/en`,
@@ -85,6 +74,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: localizedAlternates("/privacy"),
     },
   ];
+
+  if (process.env.SUPABASE_BUILD_PLACEHOLDER === "1") {
+    return staticRoutes;
+  }
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("slug")
+    .order("slug");
 
   const topicRoutes: MetadataRoute.Sitemap = (categories ?? []).map((cat) => ({
     url: `${BASE_URL}/fr/topics/${cat.slug}`,
