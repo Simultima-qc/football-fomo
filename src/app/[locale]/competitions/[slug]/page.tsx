@@ -54,18 +54,26 @@ export default async function CompetitionPage({ params }: Props) {
   const entity = await getEntityBySlug(slug);
   if (!entity || entity.entityType !== "COMPETITION") notFound();
 
+  // Use a higher fetch limit so the post-merge sort yields the truly most-recent
+  // items. Without this, each source would be capped at 20 before merging, which
+  // can silently hide recent articles that fall outside either source's top 20.
+  const FETCH_LIMIT = 100;
+  const DISPLAY_LIMIT = 50;
+
   const [entityItems, matchingCategory] = await Promise.all([
-    getTrendItemsByEntity(entity.id),
+    getTrendItemsByEntity(entity.id, FETCH_LIMIT),
     getCategoryBySlug(slug),
   ]);
   const categoryItems = matchingCategory
-    ? await getTrendItemsByCategory(matchingCategory.id)
+    ? await getTrendItemsByCategory(matchingCategory.id, FETCH_LIMIT)
     : [];
   const seenIds = new Set(entityItems.map((i) => i.id));
   const items = [
     ...entityItems,
     ...categoryItems.filter((i) => !seenIds.has(i.id)),
-  ].sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+  ]
+    .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
+    .slice(0, DISPLAY_LIMIT);
   const name = locale === "fr" ? (entity.nameFr ?? entity.nameEn) : entity.nameEn;
   const description =
     locale === "fr"

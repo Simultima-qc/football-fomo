@@ -213,6 +213,9 @@ export async function getTrendItemsByEntity(entityId: string, limit = 20) {
     .from("trend_item_entities")
     .select(`trendItem:trend_items(*, category:categories(id, slug, nameEn, nameFr, color))`)
     .eq("entityId", entityId)
+    // Order on the embedded relation so the DB-level LIMIT captures the most
+    // recent items, not an arbitrary subset that is then sorted in memory.
+    .order("publishDate", { referencedTable: "trend_items", ascending: false })
     .limit(limit);
 
   if (error) { console.error("getTrendItemsByEntity:", error); return []; }
