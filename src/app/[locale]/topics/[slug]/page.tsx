@@ -108,6 +108,7 @@ export default async function TopicPage({ params }: Props) {
                   locale={locale}
                   rank={i + 1}
                   variant="default"
+                  showDate
                 />
               ))}
             </div>

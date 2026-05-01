@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { ExternalLink, Star } from "lucide-react";
+import { Calendar, ExternalLink, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { TrendBadge } from "./TrendBadge";
 import { CategoryBadge } from "./CategoryBadge";
 import { Wc2026SimCTA, isWc2026Category } from "./Wc2026SimCTA";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import type { TrendItemRecord } from "@/lib/supabase/queries";
 
 interface TrendItemCardProps {
@@ -12,9 +12,10 @@ interface TrendItemCardProps {
   locale: string;
   rank?: number;
   variant?: "default" | "compact" | "featured";
+  showDate?: boolean;
 }
 
-export function TrendItemCard({ item, locale, rank, variant = "default" }: TrendItemCardProps) {
+export function TrendItemCard({ item, locale, rank, variant = "default", showDate }: TrendItemCardProps) {
   const t = useTranslations("item");
   const title = locale === "fr" ? item.titleFr : item.titleEn;
   const summary = locale === "fr" ? item.shortSummaryFr : item.shortSummaryEn;
@@ -87,6 +88,14 @@ export function TrendItemCard({ item, locale, rank, variant = "default" }: Trend
             </span>
           )}
         </div>
+
+        {/* Date */}
+        {showDate && (
+          <div className="flex items-center gap-1.5 text-zinc-500 text-xs mb-2">
+            <Calendar className="w-3 h-3 flex-shrink-0" />
+            <span className="capitalize">{formatDate(item.publishDate, locale)}</span>
+          </div>
+        )}
 
         {/* Title */}
         <h3 className="text-base font-bold text-white leading-snug mb-2">{title}</h3>

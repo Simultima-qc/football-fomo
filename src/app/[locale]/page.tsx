@@ -68,8 +68,8 @@ export default async function HomePage({
   const displayDate = formatDate(`${todayDate}T12:00:00Z`, locale);
   const statusLabel = isFreshDigest
     ? locale === "fr"
-      ? "Mis à jour · Aujourd'hui"
-      : "Updated · Today"
+      ? `Mis à jour · ${displayDate}`
+      : `Updated · ${displayDate}`
     : locale === "fr"
       ? `Dernière mise à jour · ${displayDate}`
       : `Last updated · ${displayDate}`;
