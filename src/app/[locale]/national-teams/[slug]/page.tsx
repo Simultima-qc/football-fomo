@@ -100,7 +100,7 @@ export default async function NationalTeamPage({ params }: Props) {
           {items.length > 0 ? (
             <div className="space-y-4">
               {items.map((item: TrendItemRecord, i: number) => (
-                <TrendItemCard key={item.id} item={item} locale={locale} rank={i + 1} variant="default" />
+                <TrendItemCard key={item.id} item={item} locale={locale} rank={i + 1} variant="default" showDate />
               ))}
             </div>
           ) : (
