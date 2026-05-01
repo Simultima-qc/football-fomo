@@ -198,7 +198,7 @@ export async function getTrendItemsByCategory(categoryId: string, limit = 20) {
     .from("trend_items")
     .select(`*, category:categories(id, slug, nameEn, nameFr, color)`)
     .eq("categoryId", categoryId)
-    .order("trendScore", { ascending: false })
+    .order("publishDate", { ascending: false })
     .limit(limit);
 
   if (error) { console.error("getTrendItemsByCategory:", error); return []; }

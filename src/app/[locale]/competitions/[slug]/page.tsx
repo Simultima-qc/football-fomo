@@ -10,6 +10,8 @@ import {
   getEntityBySlug,
   getTrendItemsByEntity,
   getEntitiesByType,
+  getCategoryBySlug,
+  getTrendItemsByCategory,
   type TrendItemRecord,
 } from "@/lib/supabase/queries";
 
@@ -52,7 +54,18 @@ export default async function CompetitionPage({ params }: Props) {
   const entity = await getEntityBySlug(slug);
   if (!entity || entity.entityType !== "COMPETITION") notFound();
 
-  const items = await getTrendItemsByEntity(entity.id);
+  const [entityItems, matchingCategory] = await Promise.all([
+    getTrendItemsByEntity(entity.id),
+    getCategoryBySlug(slug),
+  ]);
+  const categoryItems = matchingCategory
+    ? await getTrendItemsByCategory(matchingCategory.id)
+    : [];
+  const seenIds = new Set(entityItems.map((i) => i.id));
+  const items = [
+    ...entityItems,
+    ...categoryItems.filter((i) => !seenIds.has(i.id)),
+  ].sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
   const name = locale === "fr" ? (entity.nameFr ?? entity.nameEn) : entity.nameEn;
   const description =
     locale === "fr"
