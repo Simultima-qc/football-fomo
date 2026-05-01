@@ -1,7 +1,8 @@
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const WC2026_URL = "https://wc2026sim.com";
+const WC2026_URL_CARD = "https://wc2026sim.com?utm_source=footballfomo&utm_medium=referral&utm_campaign=wc2026-cta&utm_content=card";
+const WC2026_URL_SECTION = "https://wc2026sim.com?utm_source=footballfomo&utm_medium=referral&utm_campaign=wc2026-cta&utm_content=section";
 
 /** Category slugs that qualify for the WC 2026 sim CTA */
 export const WC2026_CATEGORY_SLUGS = ["national-teams", "world-cup-2026"] as const;
@@ -47,7 +48,7 @@ export function Wc2026SimCTA({ locale, variant = "card", className }: Wc2026SimC
                 : "Build your own bracket, pick your groups, and see who lifts the trophy."}
             </p>
             <a
-              href={WC2026_URL}
+              href={WC2026_URL_SECTION}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
@@ -64,7 +65,7 @@ export function Wc2026SimCTA({ locale, variant = "card", className }: Wc2026SimC
   // card variant — compact strip
   return (
     <a
-      href={WC2026_URL}
+      href={WC2026_URL_CARD}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
