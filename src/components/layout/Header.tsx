@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { LatestDailyLink } from "@/components/shared/LatestDailyLink";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,16 @@ export function Header() {
   const locale = useLocale();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+
+  const exploreLinks = [
+    { href: `/${locale}/players`, label: t("players") },
+    { href: `/${locale}/clubs`, label: t("clubs") },
+    { href: `/${locale}/national-teams`, label: t("national_teams") },
+    { href: `/${locale}/competitions`, label: t("competitions") },
+  ];
+
+  const isExplorePath = exploreLinks.some((l) => pathname.startsWith(l.href));
 
   const otherLocale = locale === "fr" ? "en" : "fr";
   // Build alternate locale URL by replacing the locale prefix
@@ -64,6 +75,40 @@ export function Header() {
             >
               World Cup 2026
             </Link>
+            <div
+              className="relative"
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) setExploreOpen(false);
+              }}
+            >
+              <button
+                onClick={() => setExploreOpen(!exploreOpen)}
+                className={cn(
+                  "flex items-center gap-1 text-sm font-medium transition-colors hover:text-white",
+                  isExplorePath ? "text-white" : "text-zinc-400"
+                )}
+              >
+                {t("explore")}
+                <ChevronDown className={cn("w-3 h-3 transition-transform", exploreOpen && "rotate-180")} />
+              </button>
+              {exploreOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 rounded-lg border border-zinc-800 bg-zinc-900 py-1 shadow-xl z-50">
+                  {exploreLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setExploreOpen(false)}
+                      className={cn(
+                        "block px-4 py-2 text-sm transition-colors hover:text-white hover:bg-zinc-800",
+                        pathname.startsWith(item.href) ? "text-white" : "text-zinc-400"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             <Link
               href={`/${locale}/newsletter`}
               className={cn(
@@ -141,6 +186,24 @@ export function Header() {
             >
               World Cup 2026
             </Link>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-widest text-zinc-600 pt-2 pb-1">
+                {t("explore")}
+              </div>
+              {exploreLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={cn(
+                    "block text-sm font-medium transition-colors hover:text-white py-1 pl-3",
+                    pathname.startsWith(item.href) ? "text-white" : "text-zinc-400"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
             <Link
               href={`/${locale}/newsletter`}
               onClick={() => setMenuOpen(false)}

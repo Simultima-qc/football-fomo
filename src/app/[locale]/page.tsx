@@ -13,9 +13,9 @@ const BASE_URL = "https://footballfomo.com";
 
 const LEAGUES = [
   { name: "Premier League", slug: "premier-league" },
-  { name: "Liga", slug: "la-liga" },
+  { name: "La Liga", slug: "la-liga" },
   { name: "Serie A", slug: "serie-a" },
-  { name: "MLS", slug: "mls" },
+  { name: "Bundesliga", slug: "bundesliga" },
 ] as const;
 
 export async function generateMetadata({
@@ -168,7 +168,7 @@ export default async function HomePage({
               {LEAGUES.map((league) => (
                 <GaLink
                   key={league.slug}
-                  href={`/${locale}/topics/${league.slug}`}
+                  href={`/${locale}/competitions/${league.slug}`}
                   gaEvent="league_click"
                   gaParams={{ league: league.name }}
                   className="px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-sm font-medium text-zinc-300 hover:border-emerald-500/50 hover:text-white transition-colors"
