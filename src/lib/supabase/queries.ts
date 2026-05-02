@@ -225,6 +225,25 @@ export async function getTrendItemsByEntity(entityId: string, limit = 20) {
     .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
 }
 
+/**
+ * Merges two item lists (entity-linked + category-linked), deduplicates by id,
+ * sorts by publishDate DESC, and caps the result at displayLimit.
+ * Pure function – extracted from CompetitionPage for testability.
+ */
+export function mergeAndDeduplicateItems(
+  entityItems: TrendItemRecord[],
+  categoryItems: TrendItemRecord[],
+  displayLimit: number
+): TrendItemRecord[] {
+  const seenIds = new Set(entityItems.map((i) => i.id));
+  return [
+    ...entityItems,
+    ...categoryItems.filter((i) => !seenIds.has(i.id)),
+  ]
+    .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
+    .slice(0, displayLimit);
+}
+
 export async function getEntitiesByType(entityType: string) {
   if (usesBuildPlaceholderData()) return [];
 
