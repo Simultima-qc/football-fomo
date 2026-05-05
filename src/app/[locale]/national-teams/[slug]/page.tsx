@@ -119,4 +119,8 @@ export default async function NationalTeamPage({ params }: Props) {
             <NewsletterForm variant="section" />
           </div>
         </div>
-   
+      </main>
+      <Footer />
+    </>
+  );
+}
