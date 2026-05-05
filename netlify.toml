@@ -8,3 +8,13 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[headers]]
+  for = "/site.webmanifest"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/favicon.ico"
+  [headers.values]
+    X-Robots-Tag = "noindex"

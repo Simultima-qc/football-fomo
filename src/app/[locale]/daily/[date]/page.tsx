@@ -42,10 +42,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale === "fr"
         ? `Top sujets, moments viraux et tendances football du ${date}.`
         : `Top stories, viral moments and football trends from ${date}.`,
-    robots: {
-      index: false,
-      follow: true,
-    },
     alternates: {
       canonical: `${BASE_URL}/${locale}/daily/${date}`,
       languages: {

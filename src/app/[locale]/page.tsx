@@ -38,7 +38,7 @@ export async function generateMetadata({
       languages: {
         en: `${BASE_URL}/en`,
         fr: `${BASE_URL}/fr`,
-        "x-default": BASE_URL,
+        "x-default": `${BASE_URL}/en`,
       },
     },
   };

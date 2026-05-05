@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://footballfomo.com";
 const locales = ["fr", "en"] as const;
+const defaultLocale = "en";
 
 function localizedAlternates(path: string) {
   return {
@@ -10,7 +11,7 @@ function localizedAlternates(path: string) {
       ...Object.fromEntries(
         locales.map((locale) => [locale, `${BASE_URL}/${locale}${path}`])
       ),
-      "x-default": `${BASE_URL}${path || ""}`,
+      "x-default": `${BASE_URL}/${defaultLocale}${path}`,
     },
   };
 }
