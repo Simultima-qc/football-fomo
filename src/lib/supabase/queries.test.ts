@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterAll } from "vitest";
 import {
   getTrendItemsByEntity,
   getTrendItemsByCategory,
@@ -43,6 +43,20 @@ vi.mock("./server", () => ({
 
 // Import after mock registration so the mock is in place.
 import { createClient } from "./server";
+
+const originalSupabaseBuildPlaceholder = process.env.SUPABASE_BUILD_PLACEHOLDER;
+
+beforeEach(() => {
+  process.env.SUPABASE_BUILD_PLACEHOLDER = "0";
+});
+
+afterAll(() => {
+  if (originalSupabaseBuildPlaceholder === undefined) {
+    delete process.env.SUPABASE_BUILD_PLACEHOLDER;
+    return;
+  }
+  process.env.SUPABASE_BUILD_PLACEHOLDER = originalSupabaseBuildPlaceholder;
+});
 
 // ─── Fixture factory ──────────────────────────────────────────────────────────
 
