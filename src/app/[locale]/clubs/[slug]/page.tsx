@@ -52,7 +52,8 @@ export default async function ClubPage({ params }: Props) {
   const entity = await getEntityBySlug(slug);
   if (!entity || entity.entityType !== "CLUB") notFound();
 
-  const items = await getTrendItemsByEntity(entity.id);
+  const DISPLAY_LIMIT = 50;
+  const items = await getTrendItemsByEntity(entity.id, DISPLAY_LIMIT);
   const name = locale === "fr" ? (entity.nameFr ?? entity.nameEn) : entity.nameEn;
   const description =
     locale === "fr"
@@ -118,8 +119,4 @@ export default async function ClubPage({ params }: Props) {
             <NewsletterForm variant="section" />
           </div>
         </div>
-      </main>
-      <Footer />
-    </>
-  );
-}
+   
