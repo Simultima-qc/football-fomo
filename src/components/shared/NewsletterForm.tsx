@@ -34,6 +34,7 @@ export function NewsletterForm({ variant = "inline", className }: NewsletterForm
       if (res.status === 409) {
         setStatus("duplicate");
       } else if (res.ok) {
+        window.gtag?.("event", "newsletter_signup", { locale });
         setStatus("success");
         setEmail("");
       } else {
