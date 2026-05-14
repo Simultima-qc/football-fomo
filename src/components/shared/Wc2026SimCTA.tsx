@@ -1,8 +1,9 @@
 import { ExternalLink } from "lucide-react";
+import { GaLink } from "./GaLink";
 import { cn } from "@/lib/utils";
 
-const WC2026_URL_CARD = "https://wc2026sim.com?utm_source=footballfomo&utm_medium=referral&utm_campaign=wc2026-cta&utm_content=card";
-const WC2026_URL_SECTION = "https://wc2026sim.com?utm_source=footballfomo&utm_medium=referral&utm_campaign=wc2026-cta&utm_content=section";
+const WC2026_URL_CARD = "https://wc2026sim.com/?utm_source=footballfomo&utm_medium=internal&utm_campaign=cross_promo_wc2026&utm_content=card";
+const WC2026_URL_SECTION = "https://wc2026sim.com/?utm_source=footballfomo&utm_medium=internal&utm_campaign=cross_promo_wc2026&utm_content=section";
 
 /** Category slugs that qualify for the WC 2026 sim CTA */
 export const WC2026_CATEGORY_SLUGS = ["national-teams", "world-cup-2026"] as const;
@@ -47,15 +48,20 @@ export function Wc2026SimCTA({ locale, variant = "card", className }: Wc2026SimC
                 ? "Crée ton propre scénario, choisis tes groupes et vois qui soulève le trophée."
                 : "Build your own bracket, pick your groups, and see who lifts the trophy."}
             </p>
-            <a
+            <GaLink
               href={WC2026_URL_SECTION}
+              gaEvent="try_wc2026_simulator"
+              gaParams={{
+                placement: "section",
+                destination_url: WC2026_URL_SECTION,
+              }}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
             >
               {isFr ? "Lancer la simulation" : "Start simulating"}
               <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            </GaLink>
           </div>
         </div>
       </div>
@@ -64,8 +70,13 @@ export function Wc2026SimCTA({ locale, variant = "card", className }: Wc2026SimC
 
   // card variant — compact strip
   return (
-    <a
+    <GaLink
       href={WC2026_URL_CARD}
+      gaEvent="try_wc2026_simulator"
+      gaParams={{
+        placement: "card",
+        destination_url: WC2026_URL_CARD,
+      }}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
@@ -82,6 +93,6 @@ export function Wc2026SimCTA({ locale, variant = "card", className }: Wc2026SimC
         wc2026sim.com
         <ExternalLink className="w-3 h-3" />
       </span>
-    </a>
+    </GaLink>
   );
 }
