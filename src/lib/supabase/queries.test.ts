@@ -75,6 +75,16 @@ function makeItem(overrides: Partial<TrendItemRecord> = {}): TrendItemRecord {
   };
 }
 
+function ids(items: TrendItemRecord[]): string[] {
+  return items.map((item) => item.id);
+}
+
+function expectOrderBeforeLimit(builder: ReturnType<typeof makeQueryBuilder>) {
+  const order = vi.mocked(builder.order as ReturnType<typeof vi.fn>);
+  const limit = vi.mocked(builder.limit as ReturnType<typeof vi.fn>);
+  expect(order.mock.invocationCallOrder[0]).toBeLessThan(limit.mock.invocationCallOrder[0]);
+}
+
 // ─── mergeAndDeduplicateItems ─────────────────────────────────────────────────
 
 describe("mergeAndDeduplicateItems", () => {
@@ -107,22 +117,59 @@ describe("mergeAndDeduplicateItems", () => {
     const newer = makeItem({ id: "new", publishDate: "2026-04-30T10:00:00Z" });
     const middle = makeItem({ id: "mid", publishDate: "2026-04-29T10:00:00Z" });
     const result = mergeAndDeduplicateItems([older, newer], [middle], 50);
-    expect(result.map((i) => i.id)).toEqual(["new", "mid", "old"]);
+    expect(ids(result)).toEqual(["new", "mid", "old"]);
   });
 
-  it("caps the result at displayLimit", () => {
-    const entityItems = Array.from({ length: 30 }, (_, i) =>
-      makeItem({ id: `e${i}`, publishDate: `2026-04-${String(i + 1).padStart(2, "0")}T00:00:00Z` })
+  it("caps the result at displayLimit after merge and publishDate DESC sort", () => {
+    const staleEntityItems = Array.from({ length: 5 }, (_, i) =>
+      makeItem({ id: `old-entity-${i}`, publishDate: `2026-04-0${i + 1}T00:00:00Z` })
     );
-    const categoryItems = Array.from({ length: 30 }, (_, i) =>
-      makeItem({ id: `c${i}`, publishDate: `2026-03-${String(i + 1).padStart(2, "0")}T00:00:00Z` })
-    );
-    const result = mergeAndDeduplicateItems(entityItems, categoryItems, 25);
-    expect(result).toHaveLength(25);
+    const recentCategoryItems = [
+      makeItem({ id: "category-new-1", publishDate: "2026-05-04T00:00:00Z" }),
+      makeItem({ id: "category-new-2", publishDate: "2026-05-03T00:00:00Z" }),
+      makeItem({ id: "category-new-3", publishDate: "2026-05-02T00:00:00Z" }),
+      makeItem({ id: "category-new-4", publishDate: "2026-05-01T00:00:00Z" }),
+    ];
+
+    const result = mergeAndDeduplicateItems(staleEntityItems, recentCategoryItems, 3);
+
+    expect(ids(result)).toEqual(["category-new-1", "category-new-2", "category-new-3"]);
   });
 
   it("returns an empty array when both sources are empty", () => {
     expect(mergeAndDeduplicateItems([], [], 50)).toHaveLength(0);
+  });
+
+  it("deduplicates before applying the display cap", () => {
+    const entityItems = [
+      makeItem({ id: "shared", titleEn: "from entity", publishDate: "2026-05-04T00:00:00Z" }),
+      makeItem({ id: "second", publishDate: "2026-05-03T00:00:00Z" }),
+    ];
+    const categoryItems = [
+      makeItem({ id: "shared", titleEn: "from category", publishDate: "2026-05-05T00:00:00Z" }),
+      makeItem({ id: "third", publishDate: "2026-05-02T00:00:00Z" }),
+    ];
+
+    const result = mergeAndDeduplicateItems(entityItems, categoryItems, 3);
+
+    expect(ids(result)).toEqual(["shared", "second", "third"]);
+    expect(result.find((item) => item.id === "shared")?.titleEn).toBe("from entity");
+  });
+
+  it("does not depend on either source being pre-sorted by the database", () => {
+    const entityItems = [
+      makeItem({ id: "entity-old", publishDate: "2026-05-01T00:00:00Z" }),
+      makeItem({ id: "entity-new", publishDate: "2026-05-04T00:00:00Z" }),
+    ];
+    const categoryItems = [
+      makeItem({ id: "category-old", publishDate: "2026-05-02T00:00:00Z" }),
+      makeItem({ id: "category-new", publishDate: "2026-05-05T00:00:00Z" }),
+      makeItem({ id: "category-mid", publishDate: "2026-05-03T00:00:00Z" }),
+    ];
+
+    const result = mergeAndDeduplicateItems(entityItems, categoryItems, 50);
+
+    expect(ids(result)).toEqual(["category-new", "entity-new", "category-mid", "category-old", "entity-old"]);
   });
 });
 
@@ -143,7 +190,21 @@ describe("getTrendItemsByEntity", () => {
     vi.mocked(createClient).mockResolvedValue(makeMockClient(builder) as never);
 
     const result = await getTrendItemsByEntity("entity-1");
-    expect(result.map((i) => i.id)).toEqual(["new", "mid", "old"]);
+    expect(ids(result)).toEqual(["new", "mid", "old"]);
+  });
+
+  it("orders the embedded trend_items relation by publishDate DESC before applying LIMIT", async () => {
+    const builder = makeQueryBuilder({ data: [], error: null });
+    vi.mocked(createClient).mockResolvedValue(makeMockClient(builder) as never);
+
+    await getTrendItemsByEntity("entity-1", 42);
+
+    expect(vi.mocked(builder.order as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+      "publishDate",
+      { referencedTable: "trend_items", ascending: false }
+    );
+    expectOrderBeforeLimit(builder);
+    expect(vi.mocked(builder.limit as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(42);
   });
 
   it("handles trendItem returned as a single-element array (Supabase join shape)", async () => {
@@ -213,6 +274,20 @@ describe("getTrendItemsByCategory", () => {
     const result = await getTrendItemsByCategory("cat-1");
     expect(result).toHaveLength(2);
     expect(result[0].id).toBe("a");
+  });
+
+  it("orders category items by publishDate DESC before applying LIMIT", async () => {
+    const builder = makeQueryBuilder({ data: [], error: null });
+    vi.mocked(createClient).mockResolvedValue(makeMockClient(builder) as never);
+
+    await getTrendItemsByCategory("cat-1", 75);
+
+    expect(vi.mocked(builder.order as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+      "publishDate",
+      { ascending: false }
+    );
+    expectOrderBeforeLimit(builder);
+    expect(vi.mocked(builder.limit as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(75);
   });
 
   it("returns an empty array and does not throw on Supabase error", async () => {
